@@ -2793,21 +2793,21 @@ func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64
 		return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
 	}
 
-	now := time.Now().UTC()
-	var lasUpdated time.Time
-	if 16 <= now.Hour() {
-		lasUpdated = now.AddDate(0, 0, 1)
-	} else {
-		lasUpdated = now
-	}
-	todayStart := time.Date(lasUpdated.Year(), lasUpdated.Month(), lasUpdated.Day(), 16, 0, 0, 0, time.UTC)
+	//now := time.Now().UTC()
+	//var lasUpdated time.Time
+	//if 16 <= now.Hour() {
+	//	lasUpdated = now.AddDate(0, 0, 1)
+	//} else {
+	//	lasUpdated = now
+	//}
+	//todayStart := time.Date(lasUpdated.Year(), lasUpdated.Month(), lasUpdated.Day(), 16, 0, 0, 0, time.UTC)
 
 	var buyRecord BuyRecord
 	buyRecord.UserId = userId
 	buyRecord.Amount = float64(amount)
 	buyRecord.AmountGet = 0
 	buyRecord.Status = 1
-	buyRecord.LastUpdated = todayStart.Unix()
+	buyRecord.LastUpdated = time.Now().UTC().Unix()
 
 	res = ui.data.DB(ctx).Table("buy_record").Create(&buyRecord)
 	if res.Error != nil {
