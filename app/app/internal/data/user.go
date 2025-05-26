@@ -2872,7 +2872,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 		res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
 			Updates(map[string]interface{}{
 				"amount":     gorm.Expr("amount - ?", amountOrigin),
-				"out_num":    gorm.Expr("out_num + ?", 1),
+				"out_rate":   gorm.Expr("out_rate + ?", 1),
 				"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 			})
 		if res.Error != nil {
