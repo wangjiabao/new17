@@ -8,6 +8,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -194,7 +195,12 @@ func (ruc *RecordUseCase) GetGlobalLock(ctx context.Context) (*GlobalLock, error
 	return ruc.locationRepo.GetLockGlobalLocation(ctx)
 }
 
+var lockAll sync.Mutex
+
 func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount uint64, eth *EthUserRecord) error {
+	lockAll.Lock()
+	defer lockAll.Unlock()
+
 	// 推荐人
 	var (
 		err       error
