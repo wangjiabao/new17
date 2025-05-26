@@ -380,6 +380,7 @@ type UserBalanceRepo interface {
 	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 	UpdateLocationNewMax(ctx context.Context, userId int64, amount int64) (int64, error)
+	GetAllUsersB(ctx context.Context) ([]*User, error)
 }
 
 type UserRecommendRepo interface {
@@ -422,6 +423,9 @@ type UserInfoRepo interface {
 	UpdateUserRewardAreaTwo(ctx context.Context, userId int64, amountUsdt float64, stop bool) (int64, error)
 	UpdateUserRewardRecommendUserGet(ctx context.Context, userId int64, amountUsdt float64, enough bool, amount float64) error
 	UpdateUserMyTotalAmount(ctx context.Context, userId int64, amountUsdt float64) error
+	UpdateUserMyTotalAmountAdd(ctx context.Context, userId int64, amountUsdt float64) error
+	UpdateUserMyTotalAmountSub(ctx context.Context, userId int64, amountUsdt float64) error
+	GetBuyRecord(ctx context.Context, day int) ([]*BuyRecord, error)
 	UpdateTotalOne(ctx context.Context, amountUsdt float64) error
 	UpdateUserNewTwoNewThree(ctx context.Context, userId int64, amount uint64, last uint64, coinType string) error
 	UpdateUserUsdtFloat(ctx context.Context, userId int64, amount float64, last float64, coinType string) error
@@ -442,6 +446,7 @@ type UserInfoRepo interface {
 	UpdateUserRewardTotalOneNew(ctx context.Context, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool, i int64) (int64, error)
 	UpdateUserRewardTotalTwoNew(ctx context.Context, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool, i int64) (int64, error)
 	UpdateUserRewardTotalOver(ctx context.Context) error
+	UpdateUserRewardRecommend2(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string) error
 }
 
 type UserRepo interface {

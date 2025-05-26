@@ -66,23 +66,23 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	//	}
 	//}
 
-	var (
-		configs []*biz.Config
-		bPrice  float64
-	)
-	configs, _ = a.uuc.GetbPriceConfig(ctx)
-	if nil != configs {
-		for _, vConfig := range configs {
-			if "b_price" == vConfig.KeyName {
-				bPrice, _ = strconv.ParseFloat(vConfig.Value, 10)
-			}
-		}
-	}
-
-	if 0 == bPrice {
-		fmt.Println("入金错误：价格为0")
-		return nil, nil
-	}
+	//var (
+	//	configs []*biz.Config
+	//	bPrice  float64
+	//)
+	//configs, _ = a.uuc.GetbPriceConfig(ctx)
+	//if nil != configs {
+	//	for _, vConfig := range configs {
+	//		if "b_price" == vConfig.KeyName {
+	//			bPrice, _ = strconv.ParseFloat(vConfig.Value, 10)
+	//		}
+	//	}
+	//}
+	//
+	//if 0 == bPrice {
+	//	fmt.Println("入金错误：价格为0")
+	//	return nil, nil
+	//}
 
 	for i := 1; i <= 10; i++ {
 		var (
@@ -107,7 +107,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 		// 0x0299e92df88c034F6425e78b6f6A367e84160B45 test
 		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
-		userLength, err = getUserLength("0x66e93E9108370fEf2a04d9036C21151439FE19CF")
+		userLength, err = getUserLength("0x4f9551c187987Bf0051E3Cb89808913fa01d3A8F")
 		if nil != err {
 			fmt.Println(err)
 		}
@@ -126,7 +126,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 		// 0x0299e92df88c034F6425e78b6f6A367e84160B454 test
 		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
-		depositUsdtResult, err = getUserInfo(last, userLength-1, "0x66e93E9108370fEf2a04d9036C21151439FE19CF")
+		depositUsdtResult, err = getUserInfo(last, userLength-1, "0x4f9551c187987Bf0051E3Cb89808913fa01d3A8F")
 		if nil != err {
 			break
 		}
