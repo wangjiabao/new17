@@ -2828,6 +2828,19 @@ func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64
 		return errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
 	}
 
+	var (
+		rewardTwo Reward
+	)
+
+	rewardTwo.UserId = userId
+	rewardTwo.AmountNew = float64(amount)
+	rewardTwo.Type = "ISPAY"       // 本次分红的行为类型
+	rewardTwo.Reason = "buy_ispay" // 给我分红的理由
+	err = ui.data.DB(ctx).Table("reward").Create(&rewardTwo).Error
+	if err != nil {
+		return errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
+
 	return nil
 }
 
