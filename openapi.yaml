@@ -564,6 +564,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/daily_reward:
+        get:
+            tags:
+                - App
+            operationId: App_AdminDailyReward
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminDailyRewardReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/deposit:
         get:
             tags:
@@ -1788,6 +1806,9 @@ components:
             type: object
             properties: {}
         AdminDailyRecommendRewardReply:
+            type: object
+            properties: {}
+        AdminDailyRewardReply:
             type: object
             properties: {}
         AdminFeeReply:

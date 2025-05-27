@@ -248,6 +248,8 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		amount = 15000
 	} else if 30000 == amount {
 		amount = 30000
+	} else if 50000 == amount {
+		amount = 50000
 	} else {
 		return nil
 	}
@@ -393,9 +395,20 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 			continue
 		}
 
+		tmpSend := float64(0)
+		if 0 >= usersMap[tmpUserId].Last {
+			if 1500000 <= usersMap[tmpUserId].MyTotalAmount+float64(amount) {
+				tmpSend = 50000
+			} else if 500000 <= usersMap[tmpUserId].MyTotalAmount+float64(amount) {
+				tmpSend = 30000
+			} else if 150000 <= usersMap[tmpUserId].MyTotalAmount+float64(amount) {
+				tmpSend = 10000
+			}
+		}
+
 		// 增加业绩
 		if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-			err = ruc.userInfoRepo.UpdateUserMyTotalAmountAdd(ctx, tmpUserId, float64(amount))
+			err = ruc.userInfoRepo.UpdateUserMyTotalAmountAdd(ctx, tmpUserId, float64(amount), tmpSend)
 			if err != nil {
 				return err
 			}
@@ -425,15 +438,21 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 				}
 
 				for _, vUserRecords := range userBuyRecords[tmpUserId] {
+					if vUserRecords.Amount*num <= vUserRecords.AmountGet {
+						fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+						continue
+					}
+
 					var (
 						stopRecommend bool
 					)
 					tmpU := amountRecommendTmp
 					if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
 						tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
-						amountRecommendTmp -= tmpU
 						stopRecommend = true
 					}
+
+					amountRecommendTmp -= tmpU
 
 					tmpURel := math.Round(tmpU*uRate*10000000) / 10000000
 					tmpB := math.Round(tmpU*bRate*10000000) / 10000000
@@ -477,14 +496,14 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 								}
 								if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { //
 									// 减掉业绩
-									err = ruc.userInfoRepo.UpdateUserMyTotalAmountSub(ctx, myUserRecommendAreaUserId, float64(tmpRecommendUser.Amount))
+									err = ruc.userInfoRepo.UpdateUserMyTotalAmountSub(ctx, myUserRecommendAreaUserId, vUserRecords.Amount)
 									if err != nil {
-										fmt.Println("错误分红社区：", err, amount, amountRecommendTmp, user, tmpRecommendUser)
+										fmt.Println("错误分红社区：", err, amount, amountRecommendTmp, user, vUserRecords)
 									}
 
 									return nil
 								}); nil != err {
-									fmt.Println("err reward recommend 2", err, amount, amountRecommendTmp, user, tmpRecommendUser)
+									fmt.Println("err reward recommend 2", err, amount, amountRecommendTmp, user, vUserRecords)
 								}
 							}
 						}

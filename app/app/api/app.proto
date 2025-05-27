@@ -248,6 +248,12 @@ service App {
 		};
 	};
 
+	rpc AdminDailyReward (AdminDailyRewardRequest) returns (AdminDailyRewardReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/daily_reward"
+		};
+	};
+
 	rpc AdminConfigUpdate (AdminConfigUpdateRequest) returns (AdminConfigUpdateReply) {
 		option (google.api.http) = {
 			post: "/api/admin_dhb/config_update"
@@ -911,6 +917,12 @@ message AdminMonthRecommendReply {
 		string created_at = 1;
 	}
 	int64 count = 2;
+}
+
+message AdminDailyRewardRequest {
+}
+
+message AdminDailyRewardReply {
 }
 
 message AdminConfigRequest {

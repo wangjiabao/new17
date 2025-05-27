@@ -185,6 +185,10 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	return &v1.DepositReply{}, nil
 }
 
+func (a *AppService) AdminDailyReward(ctx context.Context, req *v1.AdminDailyRewardRequest) (*v1.AdminDailyRewardReply, error) {
+	return a.uuc.AdminDailyReward(ctx, req)
+}
+
 // DepositBak deposit.
 func (a *AppService) DepositBak(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
 	//end := time.Now().UTC().Add(55 * time.Second)
