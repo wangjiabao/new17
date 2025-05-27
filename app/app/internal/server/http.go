@@ -58,6 +58,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList["/api.App/Deposit5"] = struct{}{}
 	whiteList["/api.App/VipCheck"] = struct{}{}
 	whiteList["/api.App/AdminAddMoney"] = struct{}{}
+	whiteList["/api.App/AdminDailyReward"] = struct{}{}
 	whiteList["/api.App/AdminAddMoneyTwo"] = struct{}{}
 	whiteList["/api.App/Deposit3"] = struct{}{}
 	whiteList["/api.App/Deposit4"] = struct{}{}

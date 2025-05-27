@@ -1283,6 +1283,7 @@ func (ur *UserRecommendRepo) GetUserRecommends(ctx context.Context) ([]*biz.User
 
 	for _, userRecommend := range userRecommends {
 		res = append(res, &biz.UserRecommend{
+			ID:            userRecommend.ID,
 			UserId:        userRecommend.UserId,
 			RecommendCode: userRecommend.RecommendCode,
 			Total:         userRecommend.Total,
@@ -2874,7 +2875,8 @@ func (ui *UserInfoRepo) UpdateUserMyTotalAmountAdd(ctx context.Context, userId i
 		rewardTwo.UserId = userId
 		rewardTwo.AmountNew = myTotal
 		rewardTwo.AmountNewTwo = myTotal
-		rewardTwo.Type = "ISPAY"  // 本次分红的行为类型
+		rewardTwo.Type = "ISPAY" // 本次分红的行为类型
+		rewardTwo.TypeRecordId = int64(myTotal)
 		rewardTwo.Reason = "send" // 给我分红的理由
 		err := ui.data.DB(ctx).Table("reward").Create(&rewardTwo).Error
 		if err != nil {
@@ -2931,7 +2933,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 		res = ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 			Updates(map[string]interface{}{
 				"status":     2,
-				"amount_get": gorm.Expr("amount_get + ?", usdt),
+				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -2940,7 +2942,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 		if 0 < usdt {
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
-					"amount_get": gorm.Expr("amount_get + ?", usdt),
+					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -2992,7 +2994,7 @@ func (ui *UserInfoRepo) UpdateUserRewardDailyLocation(ctx context.Context, id, u
 		res = ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 			Updates(map[string]interface{}{
 				"status":     2,
-				"amount_get": gorm.Expr("amount_get + ?", usdt),
+				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3001,7 +3003,7 @@ func (ui *UserInfoRepo) UpdateUserRewardDailyLocation(ctx context.Context, id, u
 		if 0 < usdt {
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
-					"amount_get": gorm.Expr("amount_get + ?", usdt),
+					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3052,7 +3054,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 		res = ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 			Updates(map[string]interface{}{
 				"status":     2,
-				"amount_get": gorm.Expr("amount_get + ?", usdt),
+				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3061,7 +3063,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 		if 0 < usdt {
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
-					"amount_get": gorm.Expr("amount_get + ?", usdt),
+					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3182,7 +3184,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommendNewTwo(ctx context.Context, id,
 		res = ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 			Updates(map[string]interface{}{
 				"status":     2,
-				"amount_get": gorm.Expr("amount_get + ?", usdt),
+				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3191,7 +3193,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommendNewTwo(ctx context.Context, id,
 		if 0 < usdt {
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
-					"amount_get": gorm.Expr("amount_get + ?", usdt),
+					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3244,7 +3246,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAllNew(ctx context.Context, id, userId i
 		res = ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 			Updates(map[string]interface{}{
 				"status":     2,
-				"amount_get": gorm.Expr("amount_get + ?", usdt),
+				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3253,7 +3255,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAllNew(ctx context.Context, id, userId i
 		if 0 < usdt {
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
-					"amount_get": gorm.Expr("amount_get + ?", usdt),
+					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")

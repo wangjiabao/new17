@@ -4734,6 +4734,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
+			//fmt.Println("测试1", tmpBuyRecords.ID, tmpUserId, tmpAreaMax, tmpMaxUserId)
 			// 如果是我大区的人，不拿，当前人的下级是不是大区的用户id
 			if i == lastKey {
 				// 直推，是我的大区
@@ -4764,6 +4765,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				//fmt.Println("测试4：", tmpUserId, tmpMaxId, tmpLastUserId)
 			}
 
+			//fmt.Println("测试2", tmpBuyRecords.ID, tmpUserId, tmpAreaMax, tmpMaxUserId)
 			for _, vMyLowUser := range myLowUser[tmpUserId] {
 				if _, ok := usersMap[vMyLowUser.UserId]; !ok {
 					fmt.Println("错误分红小区，信息缺失4：", err, tmpUserId, v)
@@ -4775,6 +4777,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 			}
 
+			//fmt.Println("测试3", tmpBuyRecords.ID, tmpUserId, tmpAreaMax, tmpMaxUserId, tmpAreaMin)
 			tmpLastLevelNum := float64(0)
 			if 0 < tmpRecommendUser.VipAdmin {
 				if 1 == tmpRecommendUser.VipAdmin {
@@ -4878,7 +4881,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 
-					err = uuc.uiRepo.UpdateUserRewardAreaOne(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, tmpRecommendUser.Address, tmpI, tmpLevel)
+					err = uuc.uiRepo.UpdateUserRewardAreaOne(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, usersMap[tmpBuyRecords.UserId].Address, tmpI, tmpLevel)
 					if err != nil {
 						fmt.Println("错误分红小区：", err, tmpRecommendUser)
 					}
@@ -5102,7 +5105,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 
-					err = uuc.uiRepo.UpdateUserRewardRecommendNewTwo(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, tmpRecommendUser.Address, int64(tmpI))
+					err = uuc.uiRepo.UpdateUserRewardRecommendNewTwo(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, usersMap[tmpBuyRecords.UserId].Address, int64(tmpI))
 					if err != nil {
 						fmt.Println("错误分红加速：", err, tmpRecommendUser)
 					}
