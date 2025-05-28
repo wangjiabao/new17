@@ -448,7 +448,7 @@ type UserInfoRepo interface {
 	UpdateUserRewardTotalOver(ctx context.Context) error
 	UpdateUserRewardRecommend2(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string) error
 	UpdateUserRewardDailyLocation(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool) error
-	UpdateUserRewardAreaOne(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i int64, two bool) error
+	UpdateUserRewardAreaOne(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i, cl int64, two bool) error
 	UpdateUserRewardRecommendNewTwo(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i int64) error
 	UpdateUserRewardAllNew(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool) error
 }
@@ -613,22 +613,10 @@ func (uuc *UserUseCase) AdminRewardList(ctx context.Context, req *v1.AdminReward
 			}
 		}
 
-		if 999999 == vUserReward.UserId {
-			tmpUser = "系统数据不需理会"
-		}
-
 		tmpReason := vUserReward.Reason
-		if "out" == tmpReason {
-			tmpUser = "系统数据不需理会"
-		}
 
-		tmpLevel := int64(0)
-		tmpNum := int64(0)
-		if "area" == vUserReward.Reason {
-			tmpLevel = vUserReward.BalanceRecordId
-			tmpNum = vUserReward.ReasonLocationId
-		}
-
+		tmpLevel := vUserReward.BalanceRecordId
+		tmpNum := vUserReward.ReasonLocationId
 		amountNew := fmt.Sprintf("%.2f", vUserReward.AmountNew)
 
 		res.Rewards = append(res.Rewards, &v1.AdminRewardListReply_List{
@@ -4881,7 +4869,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 
-					err = uuc.uiRepo.UpdateUserRewardAreaOne(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, usersMap[tmpBuyRecords.UserId].Address, tmpI, tmpLevel)
+					err = uuc.uiRepo.UpdateUserRewardAreaOne(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, usersMap[tmpBuyRecords.UserId].Address, tmpI, int64(currentLevel), tmpLevel)
 					if err != nil {
 						fmt.Println("错误分红小区：", err, tmpRecommendUser)
 					}

@@ -3037,7 +3037,7 @@ func (ui *UserInfoRepo) UpdateUserRewardDailyLocation(ctx context.Context, id, u
 }
 
 // UpdateUserRewardAreaOne .
-func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i int64, two bool) error {
+func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i, cl int64, two bool) error {
 	var err error
 
 	if stop {
@@ -3089,6 +3089,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 			reward.AmountNewTwo = raw
 			reward.Address = address
 			reward.TypeRecordId = i
+			reward.BalanceRecordId = cl
 			reward.Reason = "area_two" // 直推
 			err = ui.data.DB(ctx).Table("reward").Create(&reward).Error
 			if err != nil {
@@ -3111,6 +3112,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 			reward.AmountNewTwo = raw
 			reward.Address = address
 			reward.TypeRecordId = i
+			reward.BalanceRecordId = cl
 			reward.Reason = "area" // 直推
 			err = ui.data.DB(ctx).Table("reward").Create(&reward).Error
 			if err != nil {
