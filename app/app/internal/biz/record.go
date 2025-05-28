@@ -347,11 +347,11 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 	}
 
 	if 0 < myUserRecommendUserId {
-		if _, ok := usersMap[myUserRecommendUserId]; ok {
-			if 0 >= usersMap[myUserRecommendUserId].Amount && 0 >= usersMap[myUserRecommendUserId].OutRate {
-				return err
-			}
-		}
+		//if _, ok := usersMap[myUserRecommendUserId]; ok {
+		//	if 0 >= usersMap[myUserRecommendUserId].Amount && 0 >= usersMap[myUserRecommendUserId].OutRate {
+		//		return err
+		//	}
+		//}
 	}
 
 	// 入金
