@@ -209,7 +209,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/user_recommend", _App_AdminUserRecommend0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/month_recommend", _App_AdminMonthRecommend0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/config", _App_AdminConfig0_HTTP_Handler(srv))
-	r.GET("/api/admin_dhb/daily_reward", _App_AdminDailyReward0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/daily_reward_new", _App_AdminDailyReward0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/config_update", _App_AdminConfigUpdate0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/config_update_listen", _App_AdminConfigUpdateListen0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/password_update", _App_AdminUserPasswordUpdate0_HTTP_Handler(srv))
@@ -2029,7 +2029,7 @@ func (c *AppHTTPClientImpl) AdminDailyRecommendReward(ctx context.Context, in *A
 
 func (c *AppHTTPClientImpl) AdminDailyReward(ctx context.Context, in *AdminDailyRewardRequest, opts ...http.CallOption) (*AdminDailyRewardReply, error) {
 	var out AdminDailyRewardReply
-	pattern := "/api/admin_dhb/daily_reward"
+	pattern := "/api/admin_dhb/daily_reward_new"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppAdminDailyReward))
 	opts = append(opts, http.PathTemplate(pattern))

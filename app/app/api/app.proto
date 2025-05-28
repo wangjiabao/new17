@@ -250,7 +250,7 @@ service App {
 
 	rpc AdminDailyReward (AdminDailyRewardRequest) returns (AdminDailyRewardReply) {
 		option (google.api.http) = {
-			get: "/api/admin_dhb/daily_reward"
+			get: "/api/admin_dhb/daily_reward_new"
 		};
 	};
 
