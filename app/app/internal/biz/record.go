@@ -197,7 +197,7 @@ func (ruc *RecordUseCase) GetGlobalLock(ctx context.Context) (*GlobalLock, error
 
 var lockAll sync.Mutex
 
-func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount uint64, eth *EthUserRecord) error {
+func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount uint64, eth *EthUserRecord, system bool) error {
 	lockAll.Lock()
 	defer lockAll.Unlock()
 
@@ -362,18 +362,20 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		}
 
 		// 充值记录
-		_, err = ruc.ethUserRecordRepo.CreateEthUserRecordListByHash(ctx, &EthUserRecord{
-			Hash:      eth.Hash,
-			UserId:    eth.UserId,
-			Status:    eth.Status,
-			Type:      eth.Type,
-			Amount:    eth.Amount,
-			AmountTwo: amount,
-			CoinType:  eth.CoinType,
-			Last:      eth.Last,
-		})
-		if nil != err {
-			return err
+		if !system {
+			_, err = ruc.ethUserRecordRepo.CreateEthUserRecordListByHash(ctx, &EthUserRecord{
+				Hash:      eth.Hash,
+				UserId:    eth.UserId,
+				Status:    eth.Status,
+				Type:      eth.Type,
+				Amount:    eth.Amount,
+				AmountTwo: amount,
+				CoinType:  eth.CoinType,
+				Last:      eth.Last,
+			})
+			if nil != err {
+				return err
+			}
 		}
 
 		return nil
@@ -416,6 +418,10 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 			return nil
 		}); nil != err {
 			fmt.Println("遍历业绩：", err, tmpUserId, user)
+			continue
+		}
+
+		if system {
 			continue
 		}
 

@@ -510,6 +510,10 @@ func (uuc *UserUseCase) GetUserByAddress(ctx context.Context, Addresses ...strin
 	return uuc.repo.GetUserByAddresses(ctx, Addresses...)
 }
 
+func (uuc *UserUseCase) GetUserByAddressTwo(ctx context.Context, Address string) (*User, error) {
+	return uuc.repo.GetUserByAddressTwo(ctx, Address)
+}
+
 func (uuc *UserUseCase) GetbPriceConfig(ctx context.Context) ([]*Config, error) {
 	return uuc.configRepo.GetConfigByKeys(ctx, "b_price")
 }
@@ -9240,34 +9244,6 @@ func (uuc *UserUseCase) AdminAddMoney(ctx context.Context, req *v1.AdminDailyAdd
 
 // AdminAddMoneyTwo  .
 func (uuc *UserUseCase) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
-	var (
-		user       *User
-		userBlance *UserBalance
-		err        error
-	)
-	user, err = uuc.repo.GetUserByAddressTwo(ctx, req.Address)
-	if nil != err || nil == user {
-		return nil, nil
-	}
-
-	userBlance, err = uuc.ubRepo.GetUserBalance(ctx, user.ID)
-	if nil != err {
-		return nil, nil
-	}
-
-	if nil != userBlance && 0 < user.ID {
-		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { //
-			err = uuc.uiRepo.UpdateUserUsdtFloat(ctx, user.ID, float64(req.Usdt), userBlance.BalanceUsdtFloat, "USDT")
-			if nil != err {
-				return err
-			}
-
-			return nil
-		}); nil != err {
-			return nil, err
-		}
-	}
-
 	return nil, nil
 }
 

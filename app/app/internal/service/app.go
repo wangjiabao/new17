@@ -172,7 +172,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000000000000000",
 					CoinType:  "USDT",
 					Last:      userLength,
-				})
+				}, false)
 				if nil != err {
 					fmt.Println(err)
 				}
@@ -1052,7 +1052,36 @@ func (a *AppService) AdminAddMoney(ctx context.Context, req *v1.AdminDailyAddMon
 
 // AdminAddMoneyTwo  .
 func (a *AppService) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
-	return a.uuc.AdminAddMoneyTwo(ctx, req)
+
+	var (
+		user *biz.User
+		err  error
+	)
+
+	user, err = a.uuc.GetUserByAddressTwo(ctx, req.Address)
+	if nil != err || nil == user {
+		return nil, err
+	}
+
+	if user.Address != req.Address {
+		return nil, nil
+	}
+
+	// 充值
+	err = a.ruc.DepositNew(ctx, user.ID, uint64(req.Usdt), &biz.EthUserRecord{ // 两种币的记录
+		UserId:    user.ID,
+		Status:    "success",
+		Type:      "deposit",
+		RelAmount: req.Usdt,
+		Amount:    strconv.FormatInt(req.Usdt, 10) + "00000000000000000000",
+		CoinType:  "USDT",
+		Last:      99999,
+	}, true)
+	if nil != err {
+		fmt.Println(err)
+	}
+
+	return nil, nil
 }
 
 // AdminRecommendLevelUpdate  .
