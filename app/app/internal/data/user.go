@@ -5904,6 +5904,82 @@ func (ub *UserBalanceRepo) GetUserTrades(ctx context.Context, b *biz.Pagination,
 	return res, nil, count
 }
 
+// GetUserBuyByUserId .
+func (ub *UserBalanceRepo) GetUserBuyByUserId(ctx context.Context, userId int64) ([]*biz.BuyRecord, error) {
+	var (
+		rewards []*BuyRecord
+	)
+	res := make([]*biz.BuyRecord, 0)
+
+	instance := ub.data.db.Table("buy_record").Where("user_id=?", userId)
+
+	instance = instance.Where("status=?", 1)
+
+	if err := instance.Order("id desc").Find(&rewards).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found")
+		}
+
+		return nil, errors.New(500, "REWARD ERROR", err.Error())
+	}
+
+	for _, reward := range rewards {
+		res = append(res, &biz.BuyRecord{
+			ID:          reward.ID,
+			UserId:      reward.UserId,
+			Status:      reward.Status,
+			LastUpdated: reward.LastUpdated,
+			Amount:      reward.Amount,
+			AmountGet:   reward.AmountGet,
+			CreatedAt:   reward.CreatedAt,
+			UpdatedAt:   reward.UpdatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetUserBuy .
+func (ub *UserBalanceRepo) GetUserBuy(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.BuyRecord, error, int64) {
+	var (
+		rewards []*BuyRecord
+		count   int64
+	)
+	res := make([]*biz.BuyRecord, 0)
+
+	instance := ub.data.db.Table("buy_record")
+
+	if 0 < userId {
+		instance = instance.Where("user_id=?", userId)
+	}
+
+	instance = instance.Where("status=?", 1)
+
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("id desc").Find(&rewards).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found"), 0
+		}
+
+		return nil, errors.New(500, "REWARD ERROR", err.Error()), 0
+	}
+
+	for _, reward := range rewards {
+		res = append(res, &biz.BuyRecord{
+			ID:          reward.ID,
+			UserId:      reward.UserId,
+			Status:      reward.Status,
+			LastUpdated: reward.LastUpdated,
+			Amount:      reward.Amount,
+			AmountGet:   reward.AmountGet,
+			CreatedAt:   reward.CreatedAt,
+			UpdatedAt:   reward.UpdatedAt,
+		})
+	}
+
+	return res, nil, count
+}
+
 // GetUserRewards .
 func (ub *UserBalanceRepo) GetUserRewards(ctx context.Context, b *biz.Pagination, userId int64, reason string) ([]*biz.Reward, error, int64) {
 	var (

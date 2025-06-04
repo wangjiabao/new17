@@ -1964,13 +1964,14 @@ components:
                     type: string
                     description: |-
                         原因 每一条替换文案
+                         认购reason=buy
                          静态收益reason=location
+                         直推收益reason=recommend
+                         直推加速收益reason=recommend_two
                          团队收益reason=area
-                         直推一代收益reason=recommend_one
-                         直推二代收益reason=recommend_two
-                         帮扶收益reason=recommend_b
-                         绩效收益reason=total_one
-                         推广收益reason=total_two
+                         平级收益reason=area_two
+                         全网收益reason=all
+                         赠送reason=send
                 addressTwo:
                     type: string
                 num:
@@ -2052,13 +2053,11 @@ components:
                     type: string
                 amountUsdtGet:
                     type: string
+                amountUsdtTwo:
+                    type: string
                 balanceUsdt:
                     type: string
                 balanceDhb:
-                    type: string
-                balanceKsdt:
-                    type: string
-                recommendLevel:
                     type: string
                 out:
                     type: string
@@ -2078,14 +2077,6 @@ components:
                 lock:
                     type: string
                 lockReward:
-                    type: string
-                amountFour:
-                    type: string
-                amountFourGet:
-                    type: string
-                password:
-                    type: string
-                four:
                     type: string
                 myRecommendAddress:
                     type: string

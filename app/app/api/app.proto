@@ -629,13 +629,14 @@ message AdminRewardListReply {
 		string amountNana = 3; // 数量2
 		string address = 5; // 地址
 		// 原因 每一条替换文案
+		// 认购reason=buy
 		// 静态收益reason=location
+		// 直推收益reason=recommend
+		// 直推加速收益reason=recommend_two
 		// 团队收益reason=area
-		// 直推一代收益reason=recommend_one
-		// 直推二代收益reason=recommend_two
-		// 帮扶收益reason=recommend_b
-		// 绩效收益reason=total_one
-		// 推广收益reason=total_two
+		// 平级收益reason=area_two
+		// 全网收益reason=all
+		// 赠送reason=send
 		string reason = 6;
 		string addressTwo = 7; // 分享地址
 		int64 num = 8;		// 分享代数
@@ -697,22 +698,17 @@ message AdminUserListReply { // 用户信息
 		string address = 2; // 地址
 		string amountUsdtCurrent = 15; // 当前认购金额
 		string amountUsdtGet = 14; // 已释放
-		string balanceUsdt = 3; // rsdt数量
-		string balanceDhb = 4; // rwb数量
-		string balanceKsdt = 151; // ksdt数量
-		int64 recommendLevel = 152; // 特殊奖励
+		string amountUsdtTwo = 189; // 待释放
+		string balanceUsdt = 3; // usdt数量
+		string balanceDhb = 4; // ispay数量
 		int64 out = 7; // 出局次数
 		double areaTotal = 9; // 总业绩
 		double areaMin = 10; // 小区
 		double areaMax = 11; // 大区
-		int64 vip = 5; // 会员等级
+		int64 vip = 5; // 级别
 		int64 historyRecommend = 6; // 历史推荐人数
 		int64 lock = 12; // 锁定状态
 		int64 lockReward = 13; // 开启禁止上级分红 1表示开启，0表示关闭
-		string amountFour = 21; //
-		string amountFourGet = 22; //
-		string password = 23;
-		int64 four = 24;
 		string myRecommendAddress = 25;
 	}
 

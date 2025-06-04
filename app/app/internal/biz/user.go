@@ -316,6 +316,8 @@ type UserBalanceRepo interface {
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
 	GetUserRewardByUserId(ctx context.Context, userId int64) ([]*Reward, error)
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
+	GetUserBuy(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
+	GetUserBuyByUserId(ctx context.Context, userId int64) ([]*BuyRecord, error)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
 	GetUserBalanceByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceLockByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
@@ -790,6 +792,27 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			continue
 		}
 
+		var (
+			userBuys []*BuyRecord
+		)
+		userBuys, err = uuc.ubRepo.GetUserBuyByUserId(ctx, vUsers.ID)
+		if nil != err {
+			continue
+		}
+
+		tmpAll := float64(0)
+		tmpGet := float64(0)
+		tmpGetSub := float64(0)
+		for _, vBuy := range userBuys {
+			tmpAll += vBuy.Amount
+			tmpGet += vBuy.AmountGet
+		}
+		tmpAll *= 2.5
+
+		if tmpAll > tmpGet {
+			tmpGetSub = tmpAll - tmpGet
+		}
+
 		tmpMyRecommendUserIdsLen := int64(0)
 		tmpMax := float64(0)
 		tmpAreaMin := float64(0)
@@ -811,7 +834,20 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 				}
 			}
 		}
-		currentLevel := vUsers.Vip
+
+		currentLevel := int64(0)
+		if 1500000 <= tmpAreaMin {
+			currentLevel = 5
+		} else if 500000 <= tmpAreaMin {
+			currentLevel = 4
+		} else if 150000 <= tmpAreaMin {
+			currentLevel = 3
+		} else if 50000 <= tmpAreaMin {
+			currentLevel = 2
+		} else if 10000 <= tmpAreaMin {
+			currentLevel = 1
+		}
+
 		if 0 < vUsers.VipAdmin {
 			currentLevel = vUsers.VipAdmin
 		}
@@ -855,16 +891,11 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			AreaTotal:          vUsers.MyTotalAmount,
 			AreaMax:            tmpMax,
 			AreaMin:            tmpAreaMin,
-			AmountUsdtGet:      fmt.Sprintf("%.2f", vUsers.AmountUsdtGet),
-			AmountUsdtCurrent:  fmt.Sprintf("%.2f", vUsers.AmountUsdt),
-			BalanceKsdt:        fmt.Sprintf("%.2f", userBalances[vUsers.ID].BalanceKsdtFloat),
-			RecommendLevel:     vUsers.RecommendLevel,
+			AmountUsdtGet:      fmt.Sprintf("%.2f", tmpGet),
+			AmountUsdtCurrent:  fmt.Sprintf("%.d", vUsers.Amount),
+			AmountUsdtTwo:      fmt.Sprintf("%.2f", tmpGetSub),
 			Lock:               vUsers.Lock,
 			LockReward:         vUsers.LockReward,
-			AmountFour:         fmt.Sprintf("%.2f", vUsers.AmountFour),
-			AmountFourGet:      fmt.Sprintf("%.2f", vUsers.AmountFourGet),
-			Password:           vUsers.Password,
-			Four:               int64(vUsers.Amount),
 			MyRecommendAddress: addressMyRecommend,
 		})
 	}
@@ -877,7 +908,7 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 	var (
 		userSearch  *User
 		userId      int64 = 0
-		userRewards []*Reward
+		userRewards []*BuyRecord
 		users       map[int64]*User
 		userIdsMap  map[int64]int64
 		userIds     []int64
@@ -897,10 +928,10 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 		userId = userSearch.ID
 	}
 
-	userRewards, err, count = uuc.ubRepo.GetUserRewards(ctx, &Pagination{
+	userRewards, err, count = uuc.ubRepo.GetUserBuy(ctx, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
-	}, userId, "buy")
+	}, userId)
 	if nil != err {
 		return res, nil
 	}
@@ -925,7 +956,7 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 
 		res.Rewards = append(res.Rewards, &v1.AdminBuyListReply_List{
 			CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
-			Amount:    fmt.Sprintf("%.2f", vUserReward.AmountNew),
+			Amount:    fmt.Sprintf("%.2f", vUserReward.Amount),
 			Address:   tmpUser,
 			Id:        vUserReward.ID,
 		})
