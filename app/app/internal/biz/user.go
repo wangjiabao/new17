@@ -4404,7 +4404,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	for _, vUsers := range users {
-		if 0 < vUsers.VipAdmin {
+		if 0 < vUsers.VipAdmin && vUsers.Amount > 0 {
 			if 1 == vUsers.VipAdmin {
 				levelOne = append(levelOne, vUsers)
 			} else if 2 == vUsers.VipAdmin {
@@ -4466,25 +4466,25 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			}
 		}
 
-		if 1500000 <= tmpAreaMin {
+		if 1500000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelFive = append(levelFive, vUsers)
 			levelFour = append(levelFour, vUsers)
 			levelThree = append(levelThree, vUsers)
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 500000 <= tmpAreaMin {
+		} else if 500000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelFour = append(levelFour, vUsers)
 			levelThree = append(levelThree, vUsers)
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 150000 <= tmpAreaMin {
+		} else if 150000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelThree = append(levelThree, vUsers)
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 50000 <= tmpAreaMin {
+		} else if 50000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 10000 <= tmpAreaMin {
+		} else if 10000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelOne = append(levelOne, vUsers)
 		} else {
 			// 跳过，没级别
@@ -5184,6 +5184,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		tmpAmountAll += vReward.AmountNew
 	}
 
+	// 昨日入金: 500100 11 10 10 6 6
 	fmt.Println("昨日入金:", tmpAmountAll, len(levelOne), len(levelTwo), len(levelThree), len(levelFour), len(levelFive))
 	if 0 >= tmpAmountAll {
 		return &v1.AdminDailyRewardReply{}, nil
@@ -5195,7 +5196,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelOne) {
-		levelTmp := tmpRewardAllEach / float64(len(levelOne))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelOne))
 
 		for _, v := range levelOne {
 			tmpUsers := v
@@ -5218,6 +5219,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5287,7 +5290,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelTwo) {
-		levelTmp := tmpRewardAllEach / float64(len(levelTwo))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelTwo))
 
 		for _, v := range levelTwo {
 			tmpUsers := v
@@ -5310,6 +5313,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5379,7 +5384,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelThree) {
-		levelTmp := tmpRewardAllEach / float64(len(levelThree))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelThree))
 
 		for _, v := range levelThree {
 			tmpUsers := v
@@ -5402,6 +5407,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5471,7 +5478,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelFour) {
-		levelTmp := tmpRewardAllEach / float64(len(levelFour))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelFour))
 
 		for _, v := range levelFour {
 			tmpUsers := v
@@ -5494,6 +5501,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5563,7 +5572,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelFive) {
-		levelTmp := tmpRewardAllEach / float64(len(levelFive))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelFive))
 
 		for _, v := range levelFive {
 			tmpUsers := v
@@ -5586,6 +5595,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
