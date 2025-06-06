@@ -51,6 +51,7 @@ const OperationAppAdminRecommendLevelUpdate = "/api.App/AdminRecommendLevelUpdat
 const OperationAppAdminRecordList = "/api.App/AdminRecordList"
 const OperationAppAdminRewardList = "/api.App/AdminRewardList"
 const OperationAppAdminSetPass = "/api.App/AdminSetPass"
+const OperationAppAdminSubMoney = "/api.App/AdminSubMoney"
 const OperationAppAdminTrade = "/api.App/AdminTrade"
 const OperationAppAdminTradeList = "/api.App/AdminTradeList"
 const OperationAppAdminUndoUpdate = "/api.App/AdminUndoUpdate"
@@ -126,6 +127,7 @@ type AppHTTPServer interface {
 	AdminRecordList(context.Context, *RecordListRequest) (*RecordListReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
 	AdminSetPass(context.Context, *AdminSetPassRequest) (*AdminSetPassReply, error)
+	AdminSubMoney(context.Context, *AdminSubMoneyRequest) (*AdminSubMoneyReply, error)
 	AdminTrade(context.Context, *AdminTradeRequest) (*AdminTradeReply, error)
 	AdminTradeList(context.Context, *AdminTradeListRequest) (*AdminTradeListReply, error)
 	AdminUndoUpdate(context.Context, *AdminUndoUpdateRequest) (*AdminUndoUpdateReply, error)
@@ -239,6 +241,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/daily_location_reward_new", _App_AdminDailyLocationRewardNew0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/add_money", _App_AdminAddMoney0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/add_money_two", _App_AdminAddMoneyTwo0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/sub_money", _App_AdminSubMoney0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/test_money", _App_TestMoney0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/lock_user", _App_LockUser0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/lock_user_reward", _App_LockUserReward0_HTTP_Handler(srv))
@@ -1592,6 +1595,25 @@ func _App_AdminAddMoneyTwo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _App_AdminSubMoney0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminSubMoneyRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminSubMoney)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminSubMoney(ctx, req.(*AdminSubMoneyRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminSubMoneyReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _App_TestMoney0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in TestMoneyRequest
@@ -1729,6 +1751,7 @@ type AppHTTPClient interface {
 	AdminRecordList(ctx context.Context, req *RecordListRequest, opts ...http.CallOption) (rsp *RecordListReply, err error)
 	AdminRewardList(ctx context.Context, req *AdminRewardListRequest, opts ...http.CallOption) (rsp *AdminRewardListReply, err error)
 	AdminSetPass(ctx context.Context, req *AdminSetPassRequest, opts ...http.CallOption) (rsp *AdminSetPassReply, err error)
+	AdminSubMoney(ctx context.Context, req *AdminSubMoneyRequest, opts ...http.CallOption) (rsp *AdminSubMoneyReply, err error)
 	AdminTrade(ctx context.Context, req *AdminTradeRequest, opts ...http.CallOption) (rsp *AdminTradeReply, err error)
 	AdminTradeList(ctx context.Context, req *AdminTradeListRequest, opts ...http.CallOption) (rsp *AdminTradeListReply, err error)
 	AdminUndoUpdate(ctx context.Context, req *AdminUndoUpdateRequest, opts ...http.CallOption) (rsp *AdminUndoUpdateReply, err error)
@@ -2190,6 +2213,19 @@ func (c *AppHTTPClientImpl) AdminSetPass(ctx context.Context, in *AdminSetPassRe
 	opts = append(opts, http.Operation(OperationAppAdminSetPass))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminSubMoney(ctx context.Context, in *AdminSubMoneyRequest, opts ...http.CallOption) (*AdminSubMoneyReply, error) {
+	var out AdminSubMoneyReply
+	pattern := "/api/admin_dhb/sub_money"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminSubMoney))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

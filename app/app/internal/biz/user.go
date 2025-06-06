@@ -318,6 +318,7 @@ type UserBalanceRepo interface {
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
 	GetUserBuy(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
 	GetUserBuyByUserId(ctx context.Context, userId int64) ([]*BuyRecord, error)
+	GetUserBuyById(id int64) (*BuyRecord, error)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
 	GetUserBalanceByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceLockByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
@@ -450,6 +451,7 @@ type UserInfoRepo interface {
 	UpdateUserRewardTotalOver(ctx context.Context) error
 	UpdateUserRewardRecommend2(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string) error
 	UpdateUserRewardDailyLocation(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool) error
+	UpdateUserSubBuyRecord(ctx context.Context, id, userId int64, amountOrigin float64) error
 	UpdateUserRewardAreaOne(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i, cl int64, two bool) error
 	UpdateUserRewardRecommendNewTwo(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i int64) error
 	UpdateUserRewardAllNew(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool) error
@@ -9252,6 +9254,68 @@ func (uuc *UserUseCase) AdminAddMoney(ctx context.Context, req *v1.AdminDailyAdd
 			return nil
 		}); nil != err {
 			return nil, err
+		}
+	}
+
+	return nil, nil
+}
+
+// AdminSubMoney  .
+func (uuc *UserUseCase) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoneyRequest) (*v1.AdminSubMoneyReply, error) {
+	var (
+		buyRecord *BuyRecord
+		err       error
+	)
+	buyRecord, err = uuc.ubRepo.GetUserBuyById(req.SendBody.Id)
+	if nil != err {
+		return &v1.AdminSubMoneyReply{}, err
+	}
+
+	if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		err = uuc.uiRepo.UpdateUserSubBuyRecord(ctx, buyRecord.ID, buyRecord.UserId, buyRecord.Amount)
+		if err != nil {
+			fmt.Println("错误分红静态：", err, buyRecord)
+		}
+
+		return nil
+	}); nil != err {
+		fmt.Println("err sub daily", err, buyRecord)
+		return &v1.AdminSubMoneyReply{}, err
+	}
+
+	var (
+		userRecommend *UserRecommend
+	)
+	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, buyRecord.UserId)
+	if nil != err {
+		return &v1.AdminSubMoneyReply{}, err
+	}
+
+	if nil != userRecommend && "" != userRecommend.RecommendCode {
+		var tmpRecommendUserIds []string
+		tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		for j := len(tmpRecommendUserIds) - 1; j >= 0; j-- {
+			if 0 >= len(tmpRecommendUserIds[j]) {
+				continue
+			}
+
+			myUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[j], 10, 64) // 最后一位是直推人
+			if 0 >= myUserRecommendUserId {
+				continue
+			}
+			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error {
+				// 减掉业绩
+				err = uuc.uiRepo.UpdateUserMyTotalAmountSub(ctx, myUserRecommendUserId, buyRecord.Amount)
+				if err != nil {
+					fmt.Println("错误sub：", err, buyRecord, myUserRecommendUserId)
+					return err
+				}
+
+				return nil
+			}); nil != err {
+				fmt.Println("err sub 业绩更新", err, buyRecord)
+				continue
+			}
 		}
 	}
 

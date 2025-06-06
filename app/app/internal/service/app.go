@@ -1050,6 +1050,11 @@ func (a *AppService) AdminAddMoney(ctx context.Context, req *v1.AdminDailyAddMon
 	return a.uuc.AdminAddMoney(ctx, req)
 }
 
+// AdminSubMoney  .
+func (a *AppService) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoneyRequest) (*v1.AdminSubMoneyReply, error) {
+	return a.uuc.AdminSubMoney(ctx, req)
+}
+
 // AdminAddMoneyTwo  .
 func (a *AppService) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
 

@@ -87,6 +87,7 @@ const (
 	App_AdminDailyLocationRewardNew_FullMethodName          = "/api.App/AdminDailyLocationRewardNew"
 	App_AdminAddMoney_FullMethodName                        = "/api.App/AdminAddMoney"
 	App_AdminAddMoneyTwo_FullMethodName                     = "/api.App/AdminAddMoneyTwo"
+	App_AdminSubMoney_FullMethodName                        = "/api.App/AdminSubMoney"
 	App_TestMoney_FullMethodName                            = "/api.App/TestMoney"
 	App_LockUser_FullMethodName                             = "/api.App/LockUser"
 	App_LockUserReward_FullMethodName                       = "/api.App/LockUserReward"
@@ -166,6 +167,7 @@ type AppClient interface {
 	AdminDailyLocationRewardNew(ctx context.Context, in *AdminDailyLocationRewardNewRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardNewReply, error)
 	AdminAddMoney(ctx context.Context, in *AdminDailyAddMoneyRequest, opts ...grpc.CallOption) (*AdminDailyAddMoneyReply, error)
 	AdminAddMoneyTwo(ctx context.Context, in *AdminDailyAddMoneyTwoRequest, opts ...grpc.CallOption) (*AdminDailyAddMoneyTwoReply, error)
+	AdminSubMoney(ctx context.Context, in *AdminSubMoneyRequest, opts ...grpc.CallOption) (*AdminSubMoneyReply, error)
 	TestMoney(ctx context.Context, in *TestMoneyRequest, opts ...grpc.CallOption) (*TestMoneyReply, error)
 	LockUser(ctx context.Context, in *LockUserRequest, opts ...grpc.CallOption) (*LockUserReply, error)
 	LockUserReward(ctx context.Context, in *LockUserRewardRequest, opts ...grpc.CallOption) (*LockUserRewardReply, error)
@@ -793,6 +795,15 @@ func (c *appClient) AdminAddMoneyTwo(ctx context.Context, in *AdminDailyAddMoney
 	return out, nil
 }
 
+func (c *appClient) AdminSubMoney(ctx context.Context, in *AdminSubMoneyRequest, opts ...grpc.CallOption) (*AdminSubMoneyReply, error) {
+	out := new(AdminSubMoneyReply)
+	err := c.cc.Invoke(ctx, App_AdminSubMoney_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appClient) TestMoney(ctx context.Context, in *TestMoneyRequest, opts ...grpc.CallOption) (*TestMoneyReply, error) {
 	out := new(TestMoneyReply)
 	err := c.cc.Invoke(ctx, App_TestMoney_FullMethodName, in, out, opts...)
@@ -910,6 +921,7 @@ type AppServer interface {
 	AdminDailyLocationRewardNew(context.Context, *AdminDailyLocationRewardNewRequest) (*AdminDailyLocationRewardNewReply, error)
 	AdminAddMoney(context.Context, *AdminDailyAddMoneyRequest) (*AdminDailyAddMoneyReply, error)
 	AdminAddMoneyTwo(context.Context, *AdminDailyAddMoneyTwoRequest) (*AdminDailyAddMoneyTwoReply, error)
+	AdminSubMoney(context.Context, *AdminSubMoneyRequest) (*AdminSubMoneyReply, error)
 	TestMoney(context.Context, *TestMoneyRequest) (*TestMoneyReply, error)
 	LockUser(context.Context, *LockUserRequest) (*LockUserReply, error)
 	LockUserReward(context.Context, *LockUserRewardRequest) (*LockUserRewardReply, error)
@@ -1125,6 +1137,9 @@ func (UnimplementedAppServer) AdminAddMoney(context.Context, *AdminDailyAddMoney
 }
 func (UnimplementedAppServer) AdminAddMoneyTwo(context.Context, *AdminDailyAddMoneyTwoRequest) (*AdminDailyAddMoneyTwoReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminAddMoneyTwo not implemented")
+}
+func (UnimplementedAppServer) AdminSubMoney(context.Context, *AdminSubMoneyRequest) (*AdminSubMoneyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminSubMoney not implemented")
 }
 func (UnimplementedAppServer) TestMoney(context.Context, *TestMoneyRequest) (*TestMoneyReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TestMoney not implemented")
@@ -2378,6 +2393,24 @@ func _App_AdminAddMoneyTwo_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminSubMoney_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminSubMoneyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminSubMoney(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_AdminSubMoney_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminSubMoney(ctx, req.(*AdminSubMoneyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _App_TestMoney_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TestMoneyRequest)
 	if err := dec(in); err != nil {
@@ -2746,6 +2779,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminAddMoneyTwo",
 			Handler:    _App_AdminAddMoneyTwo_Handler,
+		},
+		{
+			MethodName: "AdminSubMoney",
+			Handler:    _App_AdminSubMoney_Handler,
 		},
 		{
 			MethodName: "TestMoney",
