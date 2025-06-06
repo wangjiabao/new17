@@ -804,6 +804,9 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		tmpGet := float64(0)
 		tmpGetSub := float64(0)
 		tmpCurrentUsdtAmount := uint64(0)
+		if 0 < vUsers.Amount {
+			tmpCurrentUsdtAmount = vUsers.Amount
+		}
 		for _, vBuy := range userBuys {
 			tmpAll += vBuy.Amount
 			tmpGet += vBuy.AmountGet
