@@ -1647,17 +1647,11 @@ components:
                     type: string
                 todayUser:
                     type: string
-                totalSendR:
+                buyTotal:
                     type: string
-                todaySendR:
-                    type: string
-                totalDeposit:
-                    type: string
-                todayDeposit:
+                todayBuy:
                     type: string
                 balanceUsdt:
-                    type: string
-                buyTotal:
                     type: string
                 todayOne:
                     type: string
@@ -1671,13 +1665,7 @@ components:
                     type: string
                 totalWithdraw:
                     type: string
-                totalHb:
-                    type: string
-                amountFour:
-                    type: string
-                amountFourGet:
-                    type: string
-                amountUsdt:
+                totalIspay:
                     type: string
         AdminAmountFourReply:
             type: object

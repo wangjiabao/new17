@@ -622,7 +622,7 @@ func (uuc *UserUseCase) AdminRewardList(ctx context.Context, req *v1.AdminReward
 		tmpReason := vUserReward.Reason
 
 		tmpLevel := vUserReward.BalanceRecordId
-		tmpNum := vUserReward.ReasonLocationId
+		tmpNum := vUserReward.TypeRecordId
 		amountNew := fmt.Sprintf("%.2f", vUserReward.AmountNew)
 
 		res.Rewards = append(res.Rewards, &v1.AdminRewardListReply_List{
@@ -803,6 +803,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		tmpAll := float64(0)
 		tmpGet := float64(0)
 		tmpGetSub := float64(0)
+		tmpCurrentUsdtAmount := uint64(0)
 		for _, vBuy := range userBuys {
 			tmpAll += vBuy.Amount
 			tmpGet += vBuy.AmountGet
@@ -892,7 +893,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			AreaMax:            tmpMax,
 			AreaMin:            tmpAreaMin,
 			AmountUsdtGet:      fmt.Sprintf("%.2f", tmpGet),
-			AmountUsdtCurrent:  fmt.Sprintf("%.d", vUsers.Amount),
+			AmountUsdtCurrent:  fmt.Sprintf("%.d", tmpCurrentUsdtAmount),
 			AmountUsdtTwo:      fmt.Sprintf("%.2f", tmpGetSub),
 			Lock:               vUsers.Lock,
 			LockReward:         vUsers.LockReward,
@@ -2457,11 +2458,9 @@ func (uuc *UserUseCase) AdminFeeDaily(ctx context.Context, req *v1.AdminDailyFee
 
 func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (*v1.AdminAllReply, error) {
 	var (
-		rewards      []*Reward
-		err          error
-		total        *Total
-		fourTotal    float64
-		fourTotalGet float64
+		rewards []*Reward
+		err     error
+		total   *Total
 	)
 	rewards, err = uuc.ubRepo.GetRewardYes(ctx)
 	if nil != err {
@@ -2473,32 +2472,27 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		return nil, err
 	}
 
-	totalRU := uint64(0)
-	todayRU := uint64(0)
 	TodayRewardRsdt := float64(0)
 	TodayRewardRsdtOther := float64(0)
 	TodayWithdraw := float64(0)
 	todayDeposit := float64(0)
 	for _, v := range rewards {
-		if "deposit" == v.Reason {
+		if "buy" == v.Reason {
 			todayDeposit += v.AmountNew
 		}
 		if "location" == v.Reason {
 			TodayRewardRsdt += v.AmountNew
 		}
+
 		if "withdraw" == v.Reason {
 			TodayWithdraw += v.AmountNew
 		}
-		if "recommend_three" == v.Reason {
-			todayRU += uint64(v.AmountNew)
-		}
-		if "recommend" == v.Reason || "recommend_two" == v.Reason || "recommend_b" == v.Reason || "area" == v.Reason {
+
+		if "recommend" == v.Reason || "recommend_two" == v.Reason || "area" == v.Reason || "area_two" == v.Reason || "all" == v.Reason {
 			TodayRewardRsdtOther += v.AmountNew
 		}
 	}
 
-	totalDeposit := int64(0)
-	totalDeposit, _ = uuc.ubRepo.GetUserBalanceRecordUsdtTotalThree(ctx)
 	var (
 		users        []*User
 		userBalances []*UserBalance
@@ -2526,38 +2520,32 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	totalUser := int64(0)
 	todayUserR := int64(0)
 	todayUser := int64(0)
-	totalHb := int64(0)
-	totalAmount := uint64(0)
 	for _, v := range users {
-		totalAmount += v.Amount
-		fourTotal += v.AmountFour
-		fourTotalGet += v.AmountFourGet
-
-		totalHb += v.RecommendUserH
 		totalUserR++
-		if 0 < v.AmountUsdt || 1 <= v.OutRate {
+		if 0 < v.Amount || 1 <= v.OutRate {
 			totalUser++
 		}
-		totalRU += v.LastBiw
 
 		if v.CreatedAt.After(todayStart) && v.CreatedAt.Before(todayEnd) {
 			todayUserR++
 			if 0 < v.AmountUsdt || 1 <= v.OutRate {
 				todayUser++
-				todayRU += v.LastBiw
 			}
 		}
 	}
 
-	TotalReward := float64(0)
 	balanceUsdtTmp := float64(0)
+	balanceIspayTmp := float64(0)
+	TotalReward := float64(0)
 	userBalances, err = uuc.repo.GetAllUserBalance(ctx)
 	if nil != err {
 		return nil, err
 	}
 	for _, v := range userBalances {
 		balanceUsdtTmp += v.BalanceUsdtFloat
-		TotalReward += v.AreaTotalFloat + v.RecommendTotalFloat + v.RecommendTotalFloatTwo + v.LocationTotalFloat
+		balanceIspayTmp += v.BalanceRawFloat
+
+		TotalReward += v.AllFloat + v.RecommendTotalFloat + v.RecommendTotalFloatTwo + v.LocationTotalFloat + v.AreaTotalFloatTwo + v.AreaTotalFloat
 	}
 
 	return &v1.AdminAllReply{
@@ -2565,22 +2553,16 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		TotalUser:     totalUser,
 		TodayUserR:    todayUserR,
 		TodayUser:     todayUser,
-		TotalSendR:    fmt.Sprintf("%.2f", float64(totalRU)),
-		TodaySendR:    fmt.Sprintf("%.2f", float64(todayRU)),
-		TotalDeposit:  fmt.Sprintf("%.2f", float64(totalDeposit)),
-		TodayDeposit:  fmt.Sprintf("%.2f", todayDeposit),
+		BuyTotal:      fmt.Sprintf("%.2f", total.One),
+		TodayBuy:      fmt.Sprintf("%.2f", todayDeposit),
 		BalanceUsdt:   fmt.Sprintf("%.2f", balanceUsdtTmp),
-		BuyTotal:      fmt.Sprintf("%.2f", total.Two),
+		TotalIspay:    fmt.Sprintf("%.2f", balanceIspayTmp),
 		TodayOne:      fmt.Sprintf("%.2f", TodayRewardRsdt),
 		TodayTwo:      fmt.Sprintf("%.2f", TodayRewardRsdtOther),
 		TodayThree:    fmt.Sprintf("%.2f", TodayRewardRsdtOther+TodayRewardRsdtOther),
 		TotalReward:   fmt.Sprintf("%.2f", TotalReward),
 		TodayWithdraw: fmt.Sprintf("%.2f", TodayWithdraw),
 		TotalWithdraw: fmt.Sprintf("%.2f", total.Three),
-		TotalHb:       fmt.Sprintf("%.2f", float64(totalHb)),
-		AmountFourGet: fmt.Sprintf("%.2f", fourTotalGet),
-		AmountFour:    fmt.Sprintf("%.2f", fourTotal),
-		AmountUsdt:    totalAmount,
 	}, nil
 }
 

@@ -859,26 +859,20 @@ message AdminAllReply {
 	int64 todayUserR = 3; // 今日注册人数
 	int64 todayUser = 4; // 今日激活人数
 
-	string totalSendR = 5; // 总注册赠送U
-	string todaySendR = 6; // 今日注册赠送U
-
-	string totalDeposit = 7; // 总充值U
-	string todayDeposit = 8; // 今日充值U
-	string balanceUsdt = 9; // 全网可提U
 	string buyTotal = 10; // 认购总数
+	string todayBuy = 20; // 今日认购总数
+
+	string balanceUsdt = 9; // 全网可提U
 
 	string todayOne = 11; // 今日静态
 	string todayTwo = 12; // 今日动态
 	string todayThree = 13; // 今日动静态
 	string totalReward = 14; // 总动静态累计
+
 	string todayWithdraw = 15; // 今日提现
 	string totalWithdraw = 16; // 总提现
-	string totalHb = 17; // hb总数
 
-	string amountFour = 18; // hb总数
-	string amountFourGet = 19; // hb总数
-
-	uint64 amountUsdt = 20;
+	string totalIspay = 17; // ispay总数
 }
 
 message AdminUserRecommendRequest {

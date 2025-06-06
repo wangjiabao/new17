@@ -620,6 +620,7 @@ func (u *UserRepo) GetAllUserBalance(ctx context.Context) ([]*biz.UserBalance, e
 			RecommendTotalFloatTwo: userBalance.RecommendTotalFloatTwo,
 			LocationTotalFloat:     userBalance.LocationTotalFloat,
 			RecommendLevelFloat:    userBalance.RecommendLevelFloat,
+			AllFloat:               userBalance.AllFloat,
 		})
 	}
 
