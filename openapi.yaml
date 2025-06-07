@@ -1168,6 +1168,29 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/sub_money:
+        get:
+            tags:
+                - App
+            operationId: App_AdminSubMoney
+            parameters:
+                - name: sendBody.id
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminSubMoneyReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/test_money:
         get:
             tags:
@@ -1647,17 +1670,11 @@ components:
                     type: string
                 todayUser:
                     type: string
-                totalSendR:
+                buyTotal:
                     type: string
-                todaySendR:
-                    type: string
-                totalDeposit:
-                    type: string
-                todayDeposit:
+                todayBuy:
                     type: string
                 balanceUsdt:
-                    type: string
-                buyTotal:
                     type: string
                 todayOne:
                     type: string
@@ -1671,13 +1688,7 @@ components:
                     type: string
                 totalWithdraw:
                     type: string
-                totalHb:
-                    type: string
-                amountFour:
-                    type: string
-                amountFourGet:
-                    type: string
-                amountUsdt:
+                totalIspay:
                     type: string
         AdminAmountFourReply:
             type: object
@@ -1988,6 +1999,9 @@ components:
                     type: string
                 pass:
                     type: string
+        AdminSubMoneyReply:
+            type: object
+            properties: {}
         AdminTradeListReply:
             type: object
             properties:

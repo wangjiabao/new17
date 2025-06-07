@@ -318,6 +318,7 @@ type UserBalanceRepo interface {
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
 	GetUserBuy(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
 	GetUserBuyByUserId(ctx context.Context, userId int64) ([]*BuyRecord, error)
+	GetUserBuyById(id int64) (*BuyRecord, error)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
 	GetUserBalanceByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceLockByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
@@ -450,6 +451,7 @@ type UserInfoRepo interface {
 	UpdateUserRewardTotalOver(ctx context.Context) error
 	UpdateUserRewardRecommend2(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string) error
 	UpdateUserRewardDailyLocation(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool) error
+	UpdateUserSubBuyRecord(ctx context.Context, id, userId int64, amountOrigin float64) error
 	UpdateUserRewardAreaOne(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i, cl int64, two bool) error
 	UpdateUserRewardRecommendNewTwo(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool, address string, i int64) error
 	UpdateUserRewardAllNew(ctx context.Context, id, userId int64, usdt, raw, usdtOrigin float64, amountOrigin float64, stop bool) error
@@ -622,7 +624,7 @@ func (uuc *UserUseCase) AdminRewardList(ctx context.Context, req *v1.AdminReward
 		tmpReason := vUserReward.Reason
 
 		tmpLevel := vUserReward.BalanceRecordId
-		tmpNum := vUserReward.ReasonLocationId
+		tmpNum := vUserReward.TypeRecordId
 		amountNew := fmt.Sprintf("%.2f", vUserReward.AmountNew)
 
 		res.Rewards = append(res.Rewards, &v1.AdminRewardListReply_List{
@@ -803,6 +805,10 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		tmpAll := float64(0)
 		tmpGet := float64(0)
 		tmpGetSub := float64(0)
+		tmpCurrentUsdtAmount := uint64(0)
+		if 0 < vUsers.Amount {
+			tmpCurrentUsdtAmount = vUsers.Amount
+		}
 		for _, vBuy := range userBuys {
 			tmpAll += vBuy.Amount
 			tmpGet += vBuy.AmountGet
@@ -892,7 +898,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			AreaMax:            float64(tmpMax),
 			AreaMin:            float64(tmpAreaMin),
 			AmountUsdtGet:      fmt.Sprintf("%.2f", tmpGet),
-			AmountUsdtCurrent:  fmt.Sprintf("%.d", vUsers.Amount),
+			AmountUsdtCurrent:  fmt.Sprintf("%.d", tmpCurrentUsdtAmount),
 			AmountUsdtTwo:      fmt.Sprintf("%.2f", tmpGetSub),
 			Lock:               vUsers.Lock,
 			LockReward:         vUsers.LockReward,
@@ -2457,11 +2463,9 @@ func (uuc *UserUseCase) AdminFeeDaily(ctx context.Context, req *v1.AdminDailyFee
 
 func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (*v1.AdminAllReply, error) {
 	var (
-		rewards      []*Reward
-		err          error
-		total        *Total
-		fourTotal    float64
-		fourTotalGet float64
+		rewards []*Reward
+		err     error
+		total   *Total
 	)
 	rewards, err = uuc.ubRepo.GetRewardYes(ctx)
 	if nil != err {
@@ -2473,32 +2477,27 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		return nil, err
 	}
 
-	totalRU := uint64(0)
-	todayRU := uint64(0)
 	TodayRewardRsdt := float64(0)
 	TodayRewardRsdtOther := float64(0)
 	TodayWithdraw := float64(0)
 	todayDeposit := float64(0)
 	for _, v := range rewards {
-		if "deposit" == v.Reason {
+		if "buy" == v.Reason {
 			todayDeposit += v.AmountNew
 		}
 		if "location" == v.Reason {
 			TodayRewardRsdt += v.AmountNew
 		}
+
 		if "withdraw" == v.Reason {
 			TodayWithdraw += v.AmountNew
 		}
-		if "recommend_three" == v.Reason {
-			todayRU += uint64(v.AmountNew)
-		}
-		if "recommend" == v.Reason || "recommend_two" == v.Reason || "recommend_b" == v.Reason || "area" == v.Reason {
+
+		if "recommend" == v.Reason || "recommend_two" == v.Reason || "area" == v.Reason || "area_two" == v.Reason || "all" == v.Reason {
 			TodayRewardRsdtOther += v.AmountNew
 		}
 	}
 
-	totalDeposit := int64(0)
-	totalDeposit, _ = uuc.ubRepo.GetUserBalanceRecordUsdtTotalThree(ctx)
 	var (
 		users        []*User
 		userBalances []*UserBalance
@@ -2526,38 +2525,32 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	totalUser := int64(0)
 	todayUserR := int64(0)
 	todayUser := int64(0)
-	totalHb := int64(0)
-	totalAmount := uint64(0)
 	for _, v := range users {
-		totalAmount += v.Amount
-		fourTotal += v.AmountFour
-		fourTotalGet += v.AmountFourGet
-
-		totalHb += v.RecommendUserH
 		totalUserR++
-		if 0 < v.AmountUsdt || 1 <= v.OutRate {
+		if 0 < v.Amount || 1 <= v.OutRate {
 			totalUser++
 		}
-		totalRU += v.LastBiw
 
 		if v.CreatedAt.After(todayStart) && v.CreatedAt.Before(todayEnd) {
 			todayUserR++
 			if 0 < v.AmountUsdt || 1 <= v.OutRate {
 				todayUser++
-				todayRU += v.LastBiw
 			}
 		}
 	}
 
-	TotalReward := float64(0)
 	balanceUsdtTmp := float64(0)
+	balanceIspayTmp := float64(0)
+	TotalReward := float64(0)
 	userBalances, err = uuc.repo.GetAllUserBalance(ctx)
 	if nil != err {
 		return nil, err
 	}
 	for _, v := range userBalances {
 		balanceUsdtTmp += v.BalanceUsdtFloat
-		TotalReward += v.AreaTotalFloat + v.RecommendTotalFloat + v.RecommendTotalFloatTwo + v.LocationTotalFloat
+		balanceIspayTmp += v.BalanceRawFloat
+
+		TotalReward += v.AllFloat + v.RecommendTotalFloat + v.RecommendTotalFloatTwo + v.LocationTotalFloat + v.AreaTotalFloatTwo + v.AreaTotalFloat
 	}
 
 	return &v1.AdminAllReply{
@@ -2565,22 +2558,16 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		TotalUser:     totalUser,
 		TodayUserR:    todayUserR,
 		TodayUser:     todayUser,
-		TotalSendR:    fmt.Sprintf("%.2f", float64(totalRU)),
-		TodaySendR:    fmt.Sprintf("%.2f", float64(todayRU)),
-		TotalDeposit:  fmt.Sprintf("%.2f", float64(totalDeposit)),
-		TodayDeposit:  fmt.Sprintf("%.2f", todayDeposit),
+		BuyTotal:      fmt.Sprintf("%.2f", total.One),
+		TodayBuy:      fmt.Sprintf("%.2f", todayDeposit),
 		BalanceUsdt:   fmt.Sprintf("%.2f", balanceUsdtTmp),
-		BuyTotal:      fmt.Sprintf("%.2f", total.Two),
+		TotalIspay:    fmt.Sprintf("%.2f", balanceIspayTmp),
 		TodayOne:      fmt.Sprintf("%.2f", TodayRewardRsdt),
 		TodayTwo:      fmt.Sprintf("%.2f", TodayRewardRsdtOther),
 		TodayThree:    fmt.Sprintf("%.2f", TodayRewardRsdtOther+TodayRewardRsdtOther),
 		TotalReward:   fmt.Sprintf("%.2f", TotalReward),
 		TodayWithdraw: fmt.Sprintf("%.2f", TodayWithdraw),
 		TotalWithdraw: fmt.Sprintf("%.2f", total.Three),
-		TotalHb:       fmt.Sprintf("%.2f", float64(totalHb)),
-		AmountFourGet: fmt.Sprintf("%.2f", fourTotalGet),
-		AmountFour:    fmt.Sprintf("%.2f", fourTotal),
-		AmountUsdt:    totalAmount,
 	}, nil
 }
 
@@ -4417,7 +4404,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	for _, vUsers := range users {
-		if 0 < vUsers.VipAdmin {
+		if 0 < vUsers.VipAdmin && vUsers.Amount > 0 {
 			if 1 == vUsers.VipAdmin {
 				levelOne = append(levelOne, vUsers)
 			} else if 2 == vUsers.VipAdmin {
@@ -4479,25 +4466,25 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			}
 		}
 
-		if 1500000 <= tmpAreaMin {
+		if 1500000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelFive = append(levelFive, vUsers)
 			levelFour = append(levelFour, vUsers)
 			levelThree = append(levelThree, vUsers)
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 500000 <= tmpAreaMin {
+		} else if 500000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelFour = append(levelFour, vUsers)
 			levelThree = append(levelThree, vUsers)
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 150000 <= tmpAreaMin {
+		} else if 150000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelThree = append(levelThree, vUsers)
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 50000 <= tmpAreaMin {
+		} else if 50000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelTwo = append(levelTwo, vUsers)
 			levelOne = append(levelOne, vUsers)
-		} else if 10000 <= tmpAreaMin {
+		} else if 10000 <= tmpAreaMin && vUsers.Amount > 0 {
 			levelOne = append(levelOne, vUsers)
 		} else {
 			// 跳过，没级别
@@ -5197,6 +5184,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		tmpAmountAll += vReward.AmountNew
 	}
 
+	// 昨日入金: 500100 11 10 10 6 6
 	fmt.Println("昨日入金:", tmpAmountAll, len(levelOne), len(levelTwo), len(levelThree), len(levelFour), len(levelFive))
 	if 0 >= tmpAmountAll {
 		return &v1.AdminDailyRewardReply{}, nil
@@ -5208,7 +5196,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelOne) {
-		levelTmp := tmpRewardAllEach / float64(len(levelOne))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelOne))
 
 		for _, v := range levelOne {
 			tmpUsers := v
@@ -5231,6 +5219,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5300,7 +5290,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelTwo) {
-		levelTmp := tmpRewardAllEach / float64(len(levelTwo))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelTwo))
 
 		for _, v := range levelTwo {
 			tmpUsers := v
@@ -5323,6 +5313,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5392,7 +5384,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelThree) {
-		levelTmp := tmpRewardAllEach / float64(len(levelThree))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelThree))
 
 		for _, v := range levelThree {
 			tmpUsers := v
@@ -5415,6 +5407,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5484,7 +5478,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelFour) {
-		levelTmp := tmpRewardAllEach / float64(len(levelFour))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelFour))
 
 		for _, v := range levelFour {
 			tmpUsers := v
@@ -5507,6 +5501,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5576,7 +5572,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	if 0 < len(levelFive) {
-		levelTmp := tmpRewardAllEach / float64(len(levelFive))
+		tmpLevelC := tmpRewardAllEach / 5 / float64(len(levelFive))
 
 		for _, v := range levelFive {
 			tmpUsers := v
@@ -5599,6 +5595,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				var (
 					stopArea bool
 				)
+
+				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -9267,6 +9265,68 @@ func (uuc *UserUseCase) AdminAddMoney(ctx context.Context, req *v1.AdminDailyAdd
 			return nil
 		}); nil != err {
 			return nil, err
+		}
+	}
+
+	return nil, nil
+}
+
+// AdminSubMoney  .
+func (uuc *UserUseCase) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoneyRequest) (*v1.AdminSubMoneyReply, error) {
+	var (
+		buyRecord *BuyRecord
+		err       error
+	)
+	buyRecord, err = uuc.ubRepo.GetUserBuyById(req.SendBody.Id)
+	if nil != err {
+		return &v1.AdminSubMoneyReply{}, err
+	}
+
+	if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		err = uuc.uiRepo.UpdateUserSubBuyRecord(ctx, buyRecord.ID, buyRecord.UserId, buyRecord.Amount)
+		if err != nil {
+			fmt.Println("错误分红静态：", err, buyRecord)
+		}
+
+		return nil
+	}); nil != err {
+		fmt.Println("err sub daily", err, buyRecord)
+		return &v1.AdminSubMoneyReply{}, err
+	}
+
+	var (
+		userRecommend *UserRecommend
+	)
+	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, buyRecord.UserId)
+	if nil != err {
+		return &v1.AdminSubMoneyReply{}, err
+	}
+
+	if nil != userRecommend && "" != userRecommend.RecommendCode {
+		var tmpRecommendUserIds []string
+		tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		for j := len(tmpRecommendUserIds) - 1; j >= 0; j-- {
+			if 0 >= len(tmpRecommendUserIds[j]) {
+				continue
+			}
+
+			myUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[j], 10, 64) // 最后一位是直推人
+			if 0 >= myUserRecommendUserId {
+				continue
+			}
+			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error {
+				// 减掉业绩
+				err = uuc.uiRepo.UpdateUserMyTotalAmountSub(ctx, myUserRecommendUserId, buyRecord.Amount)
+				if err != nil {
+					fmt.Println("错误sub：", err, buyRecord, myUserRecommendUserId)
+					return err
+				}
+
+				return nil
+			}); nil != err {
+				fmt.Println("err sub 业绩更新", err, buyRecord)
+				continue
+			}
 		}
 	}
 

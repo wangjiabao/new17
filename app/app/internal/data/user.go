@@ -620,6 +620,7 @@ func (u *UserRepo) GetAllUserBalance(ctx context.Context) ([]*biz.UserBalance, e
 			RecommendTotalFloatTwo: userBalance.RecommendTotalFloatTwo,
 			LocationTotalFloat:     userBalance.LocationTotalFloat,
 			RecommendLevelFloat:    userBalance.RecommendLevelFloat,
+			AllFloat:               userBalance.AllFloat,
 		})
 	}
 
@@ -2971,6 +2972,41 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// UpdateUserSubBuyRecord .
+func (ui *UserInfoRepo) UpdateUserSubBuyRecord(ctx context.Context, id, userId int64, amountOrigin float64) error {
+	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
+		Updates(map[string]interface{}{
+			"amount":     gorm.Expr("amount - ?", amountOrigin),
+			"updated_at": time.Now().Format("2006-01-02 15:04:05"),
+		})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+	}
+
+	res = ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
+		Updates(map[string]interface{}{
+			"status": 8,
+		})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+	}
+
+	res = ui.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_raw_float": gorm.Expr("balance_raw_float - ?", amountOrigin)})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
+	}
+
+	res = ui.data.DB(ctx).Table("total").Where("id=?", 1).
+		Updates(map[string]interface{}{"one": gorm.Expr("one - ?", amountOrigin)})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
 	}
 
 	return nil
@@ -5902,6 +5938,31 @@ func (ub *UserBalanceRepo) GetUserTrades(ctx context.Context, b *biz.Pagination,
 	}
 
 	return res, nil, count
+}
+
+// GetUserBuyById .
+func (ub *UserBalanceRepo) GetUserBuyById(id int64) (*biz.BuyRecord, error) {
+	var reward *BuyRecord
+
+	instance := ub.data.db.Table("buy_record").Where("id=?", id)
+	if err := instance.First(&reward).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("REWARD_NOT_FOUND", "reward not found")
+		}
+
+		return nil, errors.New(500, "REWARD ERROR", err.Error())
+	}
+
+	return &biz.BuyRecord{
+		ID:          reward.ID,
+		UserId:      reward.UserId,
+		Status:      reward.Status,
+		LastUpdated: reward.LastUpdated,
+		Amount:      reward.Amount,
+		AmountGet:   reward.AmountGet,
+		CreatedAt:   reward.CreatedAt,
+		UpdatedAt:   reward.UpdatedAt,
+	}, nil
 }
 
 // GetUserBuyByUserId .
