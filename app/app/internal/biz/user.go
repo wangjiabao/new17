@@ -820,23 +820,23 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		}
 
 		tmpMyRecommendUserIdsLen := int64(0)
-		tmpMax := float64(0)
-		tmpAreaMin := float64(0)
+		tmpMax := uint64(0)
+		tmpAreaMin := uint64(0)
 
 		if _, ok := myLowUser[vUsers.ID]; ok {
 			tmpMyRecommendUserIdsLen = int64(len(myLowUser[vUsers.ID]))
 
 			for _, vV := range myLowUser[vUsers.ID] {
 				if _, ok2 := usersMap[vV.UserId]; ok2 {
-					if tmpMax < usersMap[vV.UserId].MyTotalAmount+usersMap[vV.UserId].AmountUsdt {
-						tmpMax = usersMap[vV.UserId].MyTotalAmount + usersMap[vV.UserId].AmountUsdt
+					if tmpMax < uint64(usersMap[vV.UserId].MyTotalAmount)+usersMap[vV.UserId].Amount {
+						tmpMax = uint64(usersMap[vV.UserId].MyTotalAmount) + usersMap[vV.UserId].Amount
 					}
 				}
 			}
 
 			if 0 < tmpMax {
-				if vUsers.MyTotalAmount > tmpMax {
-					tmpAreaMin = vUsers.MyTotalAmount - tmpMax
+				if uint64(vUsers.MyTotalAmount) > tmpMax {
+					tmpAreaMin = uint64(vUsers.MyTotalAmount) - tmpMax
 				}
 			}
 		}
@@ -895,8 +895,8 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			Out:                vUsers.OutRate,
 			HistoryRecommend:   tmpMyRecommendUserIdsLen,
 			AreaTotal:          vUsers.MyTotalAmount,
-			AreaMax:            tmpMax,
-			AreaMin:            tmpAreaMin,
+			AreaMax:            float64(tmpMax),
+			AreaMin:            float64(tmpAreaMin),
 			AmountUsdtGet:      fmt.Sprintf("%.2f", tmpGet),
 			AmountUsdtCurrent:  fmt.Sprintf("%.d", tmpCurrentUsdtAmount),
 			AmountUsdtTwo:      fmt.Sprintf("%.2f", tmpGetSub),
