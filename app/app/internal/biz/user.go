@@ -414,7 +414,7 @@ type UserCurrentMonthRecommendRepo interface {
 }
 
 type UserInfoRepo interface {
-	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64) error
+	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64) error
 	UpdateUserRewardStakeReomve(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardStake(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardNew(ctx context.Context, id, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool) (int64, error)

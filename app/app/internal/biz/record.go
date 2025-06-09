@@ -208,6 +208,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		recommend float64
 		uRate     float64
 		bRate     float64
+		sendRate  float64
 	)
 
 	// 配置
@@ -215,6 +216,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		"u_rate",
 		"b_rate",
 		"recommend",
+		"send_rate",
 	)
 	if nil != err || nil == configs {
 		return err
@@ -229,6 +231,9 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		}
 		if "b_rate" == vConfig.KeyName {
 			bRate, _ = strconv.ParseFloat(vConfig.Value, 10)
+		}
+		if "send_rate" == vConfig.KeyName {
+			sendRate, _ = strconv.ParseFloat(vConfig.Value, 10)
 		}
 	}
 
@@ -356,7 +361,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 
 	// 入金
 	if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = ruc.userInfoRepo.UpdateUserNewTwoNewTwo(ctx, userId, amount)
+		err = ruc.userInfoRepo.UpdateUserNewTwoNewTwo(ctx, userId, amount, float64(amount)*sendRate)
 		if nil != err {
 			return err
 		}
