@@ -1063,22 +1063,22 @@ func (a *AppService) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAdd
 		err  error
 	)
 
-	user, err = a.uuc.GetUserByAddressTwo(ctx, req.Address)
+	user, err = a.uuc.GetUserByAddressTwo(ctx, req.SendBody.Address)
 	if nil != err || nil == user {
 		return nil, err
 	}
 
-	if user.Address != req.Address {
+	if user.Address != req.SendBody.Address {
 		return nil, nil
 	}
 
 	// 充值
-	err = a.ruc.DepositNew(ctx, user.ID, uint64(req.Usdt), &biz.EthUserRecord{ // 两种币的记录
+	err = a.ruc.DepositNew(ctx, user.ID, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
 		UserId:    user.ID,
 		Status:    "success",
 		Type:      "deposit",
-		RelAmount: req.Usdt,
-		Amount:    strconv.FormatInt(req.Usdt, 10) + "00000000000000000000",
+		RelAmount: req.SendBody.Usdt,
+		Amount:    strconv.FormatInt(req.SendBody.Usdt, 10) + "00000000000000000000",
 		CoinType:  "USDT",
 		Last:      99999,
 	}, true)
