@@ -240,7 +240,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/daily_area_reward", _App_AdminDailyAreaReward0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/daily_location_reward_new", _App_AdminDailyLocationRewardNew0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/add_money", _App_AdminAddMoney0_HTTP_Handler(srv))
-	r.GET("/api/admin_dhb/add_money_two", _App_AdminAddMoneyTwo0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/add_money_two", _App_AdminAddMoneyTwo0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/sub_money", _App_AdminSubMoney0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/test_money", _App_TestMoney0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/lock_user", _App_LockUser0_HTTP_Handler(srv))
@@ -1579,6 +1579,9 @@ func _App_AdminAddMoney0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) 
 func _App_AdminAddMoneyTwo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in AdminDailyAddMoneyTwoRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -1819,10 +1822,10 @@ func (c *AppHTTPClientImpl) AdminAddMoney(ctx context.Context, in *AdminDailyAdd
 func (c *AppHTTPClientImpl) AdminAddMoneyTwo(ctx context.Context, in *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (*AdminDailyAddMoneyTwoReply, error) {
 	var out AdminDailyAddMoneyTwoReply
 	pattern := "/api/admin_dhb/add_money_two"
-	path := binding.EncodeURL(pattern, in, true)
+	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAppAdminAddMoneyTwo))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

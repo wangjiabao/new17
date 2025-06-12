@@ -31,19 +31,16 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Status'
     /api/admin_dhb/add_money_two:
-        get:
+        post:
             tags:
                 - App
             operationId: App_AdminAddMoneyTwo
-            parameters:
-                - name: usdt
-                  in: query
-                  schema:
-                    type: string
-                - name: address
-                  in: query
-                  schema:
-                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminDailyAddMoneyTwoRequest_SendBody'
+                required: true
             responses:
                 "200":
                     description: OK
@@ -1804,6 +1801,13 @@ components:
         AdminDailyAddMoneyTwoReply:
             type: object
             properties: {}
+        AdminDailyAddMoneyTwoRequest_SendBody:
+            type: object
+            properties:
+                usdt:
+                    type: string
+                address:
+                    type: string
         AdminDailyBalanceRewardReply:
             type: object
             properties: {}
