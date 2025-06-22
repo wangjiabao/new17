@@ -1252,11 +1252,7 @@ message AdminDailyAddMoneyReply {
 }
 
 message AdminSubMoneyRequest {
-	message SendBody{
-		int64 id = 1;
-	}
-
-	SendBody send_body = 1;
+	int64 id = 1;
 }
 
 message AdminSubMoneyReply {

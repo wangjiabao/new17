@@ -1171,7 +1171,7 @@ paths:
                 - App
             operationId: App_AdminSubMoney
             parameters:
-                - name: sendBody.id
+                - name: id
                   in: query
                   schema:
                     type: string

@@ -9277,7 +9277,7 @@ func (uuc *UserUseCase) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoney
 		buyRecord *BuyRecord
 		err       error
 	)
-	buyRecord, err = uuc.ubRepo.GetUserBuyById(req.SendBody.Id)
+	buyRecord, err = uuc.ubRepo.GetUserBuyById(req.Id)
 	if nil != err {
 		return &v1.AdminSubMoneyReply{}, err
 	}
