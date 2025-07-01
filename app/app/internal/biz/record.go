@@ -519,7 +519,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 							}
 						}
 
-						if 0 < amountRecommendTmp {
+						if 0.000001 < amountRecommendTmp {
 							continue
 						}
 					}

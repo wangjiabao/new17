@@ -4936,7 +4936,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < tmpAreaAmount {
+					if 0.000001 < tmpAreaAmount {
 						continue
 					}
 				}
@@ -5160,7 +5160,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < tmpAreaAmount {
+					if 0.000001 < tmpAreaAmount {
 						continue
 					}
 				}
@@ -5205,6 +5205,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
+			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
@@ -5220,7 +5221,6 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 
-				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5279,7 +5279,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < levelTmp {
+					if 0.000001 < levelTmp {
 						continue
 					}
 				}
@@ -5299,6 +5299,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
+			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
@@ -5314,7 +5315,6 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 
-				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5373,7 +5373,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < levelTmp {
+					if 0.000001 < levelTmp {
 						continue
 					}
 				}
@@ -5393,6 +5393,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
+			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
@@ -5408,7 +5409,6 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 
-				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5467,7 +5467,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < levelTmp {
+					if 0.000001 < levelTmp {
 						continue
 					}
 				}
@@ -5487,6 +5487,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
+			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
@@ -5502,7 +5503,6 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 
-				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5561,7 +5561,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < levelTmp {
+					if 0.000001 < levelTmp {
 						continue
 					}
 				}
@@ -5581,6 +5581,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
+			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
@@ -5596,7 +5597,6 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 
-				levelTmp := tmpLevelC
 				tmpU := levelTmp
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
@@ -5655,7 +5655,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 						}
 					}
 
-					if 0 < levelTmp {
+					if 0.000001 < levelTmp {
 						continue
 					}
 				}
