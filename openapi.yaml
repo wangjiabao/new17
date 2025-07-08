@@ -1141,6 +1141,33 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/set_ispay:
+        get:
+            tags:
+                - App
+            operationId: App_AdminSetIspay
+            parameters:
+                - name: amount
+                  in: query
+                  schema:
+                    type: string
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminSetIspayReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/set_pass:
         post:
             tags:
@@ -1993,6 +2020,9 @@ components:
                     type: string
                 level:
                     type: string
+        AdminSetIspayReply:
+            type: object
+            properties: {}
         AdminSetPassReply:
             type: object
             properties: {}

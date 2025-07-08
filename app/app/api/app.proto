@@ -445,6 +445,12 @@ service App {
 		};
 	};
 
+	rpc AdminSetIspay(AdminSetIspayRequest) returns (AdminSetIspayReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/set_ispay"
+		};
+	};
+
 	rpc AdminSubMoney(AdminSubMoneyRequest) returns (AdminSubMoneyReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/sub_money"
@@ -484,6 +490,15 @@ service App {
 		};
 	};
 }
+
+message AdminSetIspayRequest {
+	uint64 amount = 1;
+	string address = 3;
+}
+
+message AdminSetIspayReply {
+}
+
 
 message EthAuthorizeRequest {
 	message SendBody{

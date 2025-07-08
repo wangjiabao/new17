@@ -402,14 +402,42 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 			continue
 		}
 
+		usersMap[tmpUserId].MyTotalAmount = usersMap[tmpUserId].MyTotalAmount + float64(amount)
+	}
+
+	for i := totalTmp; i >= 0; i-- {
+
+		tmpUserId, _ := strconv.ParseInt(tmpRecommendUserIds[i], 10, 64) // 最后一位是直推人
+		if 0 >= tmpUserId {
+			continue
+		}
+
+		if _, ok := usersMap[tmpUserId]; !ok {
+			fmt.Println("buy遍历，信息缺失,user：", err, tmpUserId, eth)
+			continue
+		}
+
+		tmpMax := uint64(0)
+		tmpAreaMin := uint64(0)
+		for _, vV := range myLowUser[tmpUserId] {
+			if _, ok2 := usersMap[vV.UserId]; ok2 {
+				if tmpMax < uint64(usersMap[vV.UserId].MyTotalAmount)+usersMap[vV.UserId].Amount {
+					tmpMax = uint64(usersMap[vV.UserId].MyTotalAmount) + usersMap[vV.UserId].Amount
+				}
+			}
+		}
+
 		tmpSend := float64(0)
-		if 0 >= usersMap[tmpUserId].Last {
-			if 1500000 <= usersMap[tmpUserId].MyTotalAmount+float64(amount) {
-				tmpSend = 50000
-			} else if 500000 <= usersMap[tmpUserId].MyTotalAmount+float64(amount) {
-				tmpSend = 30000
-			} else if 150000 <= usersMap[tmpUserId].MyTotalAmount+float64(amount) {
-				tmpSend = 10000
+		if 0 < tmpMax {
+			if uint64(usersMap[tmpUserId].MyTotalAmount) > tmpMax {
+				tmpAreaMin = uint64(usersMap[tmpUserId].MyTotalAmount) - tmpMax
+				if 1500000 <= tmpAreaMin && 2 == usersMap[tmpUserId].Last {
+					tmpSend = 50000
+				} else if 500000 <= tmpAreaMin && 1 == usersMap[tmpUserId].Last {
+					tmpSend = 30000
+				} else if 150000 <= tmpAreaMin && 0 == usersMap[tmpUserId].Last {
+					tmpSend = 10000
+				}
 			}
 		}
 

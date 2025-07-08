@@ -2856,7 +2856,7 @@ func (ui *UserInfoRepo) UpdateUserMyTotalAmountAdd(ctx context.Context, userId i
 		res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
 			Updates(map[string]interface{}{
 				"my_total_amount": gorm.Expr("my_total_amount + ?", amountUsdt),
-				"last":            1,
+				"last":            gorm.Expr("last + ?", 1),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -4163,6 +4163,18 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaTwo(ctx context.Context, userId int6
 	}
 
 	return userBalanceRecode.ID, nil
+}
+
+// UpdateUserIspay .
+func (ui *UserInfoRepo) UpdateUserIspay(ctx context.Context, userId int64, amount uint64) error {
+	var err error
+	if err = ui.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_raw_float": float64(amount)}).Error; nil != err {
+		return errors.NotFound("user balance err", "user balance not found")
+	}
+
+	return nil
 }
 
 // UpdateUserNewTwoNewThree .

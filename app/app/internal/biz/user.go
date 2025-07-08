@@ -431,6 +431,7 @@ type UserInfoRepo interface {
 	GetBuyRecord(ctx context.Context, day int) ([]*BuyRecord, error)
 	UpdateTotalOne(ctx context.Context, amountUsdt float64) error
 	UpdateUserNewTwoNewThree(ctx context.Context, userId int64, amount uint64, last uint64, coinType string) error
+	UpdateUserIspay(ctx context.Context, userId int64, amount uint64) error
 	UpdateUserUsdtFloat(ctx context.Context, userId int64, amount float64, last float64, coinType string) error
 	UpdateUserRecommendLevel(ctx context.Context, userId int64, level uint64) error
 	UpdateUserRecommendLevel2(ctx context.Context, userId int64, level uint64) error
@@ -9242,6 +9243,32 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 	//}
 
 	return nil, err
+}
+
+func (uuc *UserUseCase) AdminSetIspay(ctx context.Context, req *v1.AdminSetIspayRequest) (*v1.AdminSetIspayReply, error) {
+	var (
+		user *User
+		err  error
+	)
+	user, err = uuc.repo.GetUserByAddressTwo(ctx, req.Address)
+	if nil != err {
+		return nil, nil
+	}
+
+	if nil != user && 0 < user.ID {
+		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { //
+			err = uuc.uiRepo.UpdateUserIspay(ctx, user.ID, req.Amount)
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); nil != err {
+			return nil, err
+		}
+	}
+
+	return nil, nil
 }
 
 // AdminAddMoney  .
