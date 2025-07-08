@@ -430,13 +430,15 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		tmpSend := float64(0)
 		if 0 < tmpMax {
 			if uint64(usersMap[tmpUserId].MyTotalAmount) > tmpMax {
-				tmpAreaMin = uint64(usersMap[tmpUserId].MyTotalAmount) - tmpMax
-				if 1500000 <= tmpAreaMin && 2 == usersMap[tmpUserId].Last {
-					tmpSend = 50000
-				} else if 500000 <= tmpAreaMin && 1 == usersMap[tmpUserId].Last {
-					tmpSend = 30000
-				} else if 150000 <= tmpAreaMin && 0 == usersMap[tmpUserId].Last {
-					tmpSend = 10000
+				if 0 < usersMap[tmpUserId].Amount {
+					tmpAreaMin = uint64(usersMap[tmpUserId].MyTotalAmount) - tmpMax
+					if 1500000 <= tmpAreaMin && 2 == usersMap[tmpUserId].Last {
+						tmpSend = 50000
+					} else if 500000 <= tmpAreaMin && 1 == usersMap[tmpUserId].Last {
+						tmpSend = 30000
+					} else if 150000 <= tmpAreaMin && 0 == usersMap[tmpUserId].Last {
+						tmpSend = 10000
+					}
 				}
 			}
 		}
