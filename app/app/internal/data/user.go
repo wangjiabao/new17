@@ -2907,6 +2907,7 @@ func (ui *UserInfoRepo) UpdateUserMyTotalAmount(ctx context.Context, userId int6
 
 // UpdateUserMyTotalAmountSub .
 func (ui *UserInfoRepo) UpdateUserMyTotalAmountSub(ctx context.Context, userId int64, amountUsdt float64) error {
+	return nil
 	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
 		Updates(map[string]interface{}{"my_total_amount": gorm.Expr("my_total_amount - ?", amountUsdt)})
 	if res.Error != nil {
