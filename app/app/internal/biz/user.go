@@ -4873,7 +4873,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停，recommend", vUserRecords)
 					continue
 				}
 
@@ -5098,7 +5098,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停，加速", vUserRecords)
 					continue
 				}
 
@@ -5217,7 +5217,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停， all1", vUserRecords)
 					continue
 				}
 
@@ -5312,7 +5312,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停，all2", vUserRecords)
 					continue
 				}
 
@@ -5407,7 +5407,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停，all3", vUserRecords)
 					continue
 				}
 
@@ -5502,7 +5502,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停，all4", vUserRecords)
 					continue
 				}
 
@@ -5597,7 +5597,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
-					fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+					fmt.Println("错误的数据，已经最大却没停，all5", vUserRecords)
 					continue
 				}
 

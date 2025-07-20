@@ -480,7 +480,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 
 				for _, vUserRecords := range userBuyRecords[tmpUserId] {
 					if vUserRecords.Amount*num <= vUserRecords.AmountGet {
-						fmt.Println("错误的数据，已经最大却没停", vUserRecords)
+						fmt.Println("错误的数据，已经最大却没停，all充值推荐", vUserRecords)
 						continue
 					}
 
