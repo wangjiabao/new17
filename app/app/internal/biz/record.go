@@ -503,6 +503,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 						err = ruc.userInfoRepo.UpdateUserRewardRecommend2(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopRecommend, user.Address)
 						if err != nil {
 							fmt.Println("错误分红直推：", err)
+							return err
 						}
 
 						return nil

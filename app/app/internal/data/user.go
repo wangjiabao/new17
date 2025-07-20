@@ -2936,6 +2936,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 			Updates(map[string]interface{}{
 				"status":     2,
 				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+				"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -2945,6 +2946,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
 					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+					"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3032,6 +3034,7 @@ func (ui *UserInfoRepo) UpdateUserRewardDailyLocation(ctx context.Context, id, u
 			Updates(map[string]interface{}{
 				"status":     2,
 				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+				"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3041,6 +3044,7 @@ func (ui *UserInfoRepo) UpdateUserRewardDailyLocation(ctx context.Context, id, u
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
 					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+					"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3092,6 +3096,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 			Updates(map[string]interface{}{
 				"status":     2,
 				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+				"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3101,6 +3106,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
 					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+					"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3224,6 +3230,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommendNewTwo(ctx context.Context, id,
 			Updates(map[string]interface{}{
 				"status":     2,
 				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+				"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3233,6 +3240,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommendNewTwo(ctx context.Context, id,
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
 					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+					"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3286,6 +3294,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAllNew(ctx context.Context, id, userId i
 			Updates(map[string]interface{}{
 				"status":     2,
 				"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+				"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 			})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3295,6 +3304,7 @@ func (ui *UserInfoRepo) UpdateUserRewardAllNew(ctx context.Context, id, userId i
 			res := ui.data.DB(ctx).Table("buy_record").Where("id=?", id).
 				Updates(map[string]interface{}{
 					"amount_get": gorm.Expr("amount_get + ?", usdtOrigin),
+					"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 				})
 			if res.Error != nil {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")

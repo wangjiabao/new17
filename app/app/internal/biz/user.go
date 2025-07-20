@@ -4559,6 +4559,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			err = uuc.uiRepo.UpdateUserRewardDailyLocation(ctx, tmpBuyRecords.ID, tmpBuyRecords.UserId, tmpURel, tmpB, tmp, tmpBuyRecords.Amount, stop)
 			if err != nil {
 				fmt.Println("错误分红静态：", err, tmpBuyRecords)
+				return err
 			}
 
 			return nil
@@ -4895,6 +4896,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardAreaOne(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, usersMap[tmpBuyRecords.UserId].Address, tmpI, int64(currentLevel), tmpLevel)
 					if err != nil {
 						fmt.Println("错误分红小区：", err, tmpRecommendUser)
+						return err
 					}
 
 					return nil
@@ -5119,6 +5121,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardRecommendNewTwo(ctx, vUserRecords.ID, tmpUserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea, usersMap[tmpBuyRecords.UserId].Address, int64(tmpI))
 					if err != nil {
 						fmt.Println("错误分红加速：", err, tmpRecommendUser)
+						return err
 					}
 
 					return nil
@@ -5238,6 +5241,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardAllNew(ctx, vUserRecords.ID, vUserRecords.UserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea)
 					if err != nil {
 						fmt.Println("错误分红all：", err, vUserRecords)
+						return err
 					}
 
 					return nil
@@ -5332,6 +5336,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardAllNew(ctx, vUserRecords.ID, vUserRecords.UserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea)
 					if err != nil {
 						fmt.Println("错误分红all：", err, vUserRecords)
+						return err
 					}
 
 					return nil
@@ -5426,6 +5431,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardAllNew(ctx, vUserRecords.ID, vUserRecords.UserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea)
 					if err != nil {
 						fmt.Println("错误分红all：", err, vUserRecords)
+						return err
 					}
 
 					return nil
@@ -5520,6 +5526,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardAllNew(ctx, vUserRecords.ID, vUserRecords.UserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea)
 					if err != nil {
 						fmt.Println("错误分红all：", err, vUserRecords)
+						return err
 					}
 
 					return nil
@@ -5614,6 +5621,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					err = uuc.uiRepo.UpdateUserRewardAllNew(ctx, vUserRecords.ID, vUserRecords.UserId, tmpURel, tmpB, tmpU, vUserRecords.Amount, stopArea)
 					if err != nil {
 						fmt.Println("错误分红all：", err, vUserRecords)
+						return err
 					}
 
 					return nil
@@ -9313,6 +9321,7 @@ func (uuc *UserUseCase) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoney
 		err = uuc.uiRepo.UpdateUserSubBuyRecord(ctx, buyRecord.ID, buyRecord.UserId, buyRecord.Amount)
 		if err != nil {
 			fmt.Println("错误分红静态：", err, buyRecord)
+			return err
 		}
 
 		return nil
