@@ -107,7 +107,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 		// 0x0299e92df88c034F6425e78b6f6A367e84160B45 test
 		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
-		userLength, err = getUserLength("0x6a0C83df44c2b269A27e9676b360b1Eb39CBBF30")
+		userLength, err = getUserLength("0x7D0c989Ec68dC09fc1d6c6222079d78733B02Ceb")
 		if nil != err {
 			fmt.Println(err)
 		}
@@ -126,7 +126,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 		// 0x0299e92df88c034F6425e78b6f6A367e84160B454 test
 		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
-		depositUsdtResult, err = getUserInfo(last, userLength-1, "0x6a0C83df44c2b269A27e9676b360b1Eb39CBBF30")
+		depositUsdtResult, err = getUserInfo(last, userLength-1, "0x7D0c989Ec68dC09fc1d6c6222079d78733B02Ceb")
 		if nil != err {
 			break
 		}
