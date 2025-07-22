@@ -490,6 +490,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 					tmpU := amountRecommendTmp
 					if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
 						tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+						vUserRecords.AmountGet = vUserRecords.Amount * 2.5
 						stopRecommend = true
 					}
 
@@ -512,43 +513,43 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 					}
 
 					if stopRecommend {
-						// 推荐人
-						var (
-							userRecommendArea *UserRecommend
-						)
-						if _, ok := userRecommendsMap[tmpRecommendUser.ID]; ok {
-							userRecommendArea = userRecommendsMap[tmpRecommendUser.ID]
-						} else {
-							fmt.Println("错误分红业绩变更，信息缺失7：", err, amount, amountRecommendTmp, user, tmpRecommendUser)
-							continue
-						}
-
-						if nil != userRecommendArea && "" != userRecommendArea.RecommendCode {
-							var tmpRecommendAreaUserIds []string
-							tmpRecommendAreaUserIds = strings.Split(userRecommendArea.RecommendCode, "D")
-
-							for j := len(tmpRecommendAreaUserIds) - 1; j >= 0; j-- {
-								if 0 >= len(tmpRecommendAreaUserIds[j]) {
-									continue
-								}
-
-								myUserRecommendAreaUserId, _ := strconv.ParseInt(tmpRecommendAreaUserIds[j], 10, 64) // 最后一位是直推人
-								if 0 >= myUserRecommendAreaUserId {
-									continue
-								}
-								if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { //
-									// 减掉业绩
-									err = ruc.userInfoRepo.UpdateUserMyTotalAmountSub(ctx, myUserRecommendAreaUserId, vUserRecords.Amount)
-									if err != nil {
-										fmt.Println("错误分红社区：", err, amount, amountRecommendTmp, user, vUserRecords)
-									}
-
-									return nil
-								}); nil != err {
-									fmt.Println("err reward recommend 2", err, amount, amountRecommendTmp, user, vUserRecords)
-								}
-							}
-						}
+						//// 推荐人
+						//var (
+						//	userRecommendArea *UserRecommend
+						//)
+						//if _, ok := userRecommendsMap[tmpRecommendUser.ID]; ok {
+						//	userRecommendArea = userRecommendsMap[tmpRecommendUser.ID]
+						//} else {
+						//	fmt.Println("错误分红业绩变更，信息缺失7：", err, amount, amountRecommendTmp, user, tmpRecommendUser)
+						//	continue
+						//}
+						//
+						//if nil != userRecommendArea && "" != userRecommendArea.RecommendCode {
+						//	var tmpRecommendAreaUserIds []string
+						//	tmpRecommendAreaUserIds = strings.Split(userRecommendArea.RecommendCode, "D")
+						//
+						//	for j := len(tmpRecommendAreaUserIds) - 1; j >= 0; j-- {
+						//		if 0 >= len(tmpRecommendAreaUserIds[j]) {
+						//			continue
+						//		}
+						//
+						//		myUserRecommendAreaUserId, _ := strconv.ParseInt(tmpRecommendAreaUserIds[j], 10, 64) // 最后一位是直推人
+						//		if 0 >= myUserRecommendAreaUserId {
+						//			continue
+						//		}
+						//		if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { //
+						//			// 减掉业绩
+						//			err = ruc.userInfoRepo.UpdateUserMyTotalAmountSub(ctx, myUserRecommendAreaUserId, vUserRecords.Amount)
+						//			if err != nil {
+						//				fmt.Println("错误分红社区：", err, amount, amountRecommendTmp, user, vUserRecords)
+						//			}
+						//
+						//			return nil
+						//		}); nil != err {
+						//			fmt.Println("err reward recommend 2", err, amount, amountRecommendTmp, user, vUserRecords)
+						//		}
+						//	}
+						//}
 
 						if 0.000001 < amountRecommendTmp {
 							continue
