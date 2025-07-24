@@ -4514,13 +4514,11 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	// 静态
-	for _, v := range buyRecords {
-		if v.Amount*2.5 <= v.AmountGet {
-			fmt.Println("错误的数据，已经最大却没停，daily", v)
+	for _, tmpBuyRecords := range buyRecords {
+		if tmpBuyRecords.Amount*2.5 <= tmpBuyRecords.AmountGet {
+			fmt.Println("错误的数据，已经最大却没停，daily", tmpBuyRecords)
 			continue
 		}
-
-		tmpBuyRecords := v
 
 		numTwo := float64(0)
 		if 50000 <= tmpBuyRecords.Amount {
@@ -4549,6 +4547,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		tmp := tmpBuyRecords.Amount * numTwo
 		if tmp+tmpBuyRecords.AmountGet >= tmpBuyRecords.Amount*2.5 {
 			tmp = math.Abs(tmpBuyRecords.Amount*2.5 - tmpBuyRecords.AmountGet)
+			tmpBuyRecords.AmountGet = tmpBuyRecords.Amount * 2.5
+			tmpBuyRecords.Status = 2
 			stop = true
 		}
 
@@ -4614,9 +4614,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	// 团队和平级
-	for _, v := range buyRecords {
-		tmpBuyRecords := v
-
+	for _, tmpBuyRecords := range buyRecords {
 		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
 			continue
 		}
@@ -4693,12 +4691,12 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			// 我的下级
 			if _, ok := myLowUser[tmpUserId]; !ok {
-				fmt.Println("错误分红小区，信息缺失3：", err, tmpUserId, v)
+				fmt.Println("错误分红小区，信息缺失3：", err, tmpUserId, tmpBuyRecords)
 				continue
 			}
 
 			if 0 >= len(myLowUser[tmpUserId]) {
-				fmt.Println("错误分红小区，信息缺失3：", err, tmpUserId, v)
+				fmt.Println("错误分红小区，信息缺失3：", err, tmpUserId, tmpBuyRecords)
 				continue
 			}
 
@@ -4731,7 +4729,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			tmpMaxUserId := int64(0)
 			for _, vMyLowUser := range myLowUser[tmpUserId] {
 				if _, ok := usersMap[vMyLowUser.UserId]; !ok {
-					fmt.Println("错误分红小区，信息缺失4：", err, tmpUserId, v)
+					fmt.Println("错误分红小区，信息缺失4：", err, tmpUserId, tmpBuyRecords)
 					continue
 				}
 
@@ -4758,13 +4756,13 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				//fmt.Println("测试2：", tmpUserId, tmpMaxId, v.ID)
 			} else {
 				if i+1 > lastKey {
-					fmt.Println("错误分红小区，信息缺失44：", err, tmpUserId, lastKey, i+1, v)
+					fmt.Println("错误分红小区，信息缺失44：", err, tmpUserId, lastKey, i+1, tmpBuyRecords)
 					continue
 				}
 
 				tmpLastUserId, _ := strconv.ParseInt(tmpRecommendUserIds[i+1], 10, 64) // 最后一位是直推人
 				if 0 >= tmpLastUserId {
-					fmt.Println("错误分红小区，信息缺失445：", err, tmpUserId, lastKey, i+1, v)
+					fmt.Println("错误分红小区，信息缺失445：", err, tmpUserId, lastKey, i+1, tmpBuyRecords)
 					continue
 				}
 
@@ -4780,7 +4778,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			//fmt.Println("测试2", tmpBuyRecords.ID, tmpUserId, tmpAreaMax, tmpMaxUserId)
 			for _, vMyLowUser := range myLowUser[tmpUserId] {
 				if _, ok := usersMap[vMyLowUser.UserId]; !ok {
-					fmt.Println("错误分红小区，信息缺失4：", err, tmpUserId, v)
+					fmt.Println("错误分红小区，信息缺失4：", err, tmpUserId, tmpBuyRecords)
 					continue
 				}
 
@@ -4844,7 +4842,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			} else {
 				// 级差
 				if tmpLastLevelNum < lastLevelNum {
-					fmt.Println("错误分红小区，配置，信息缺错误：", err, tmpUserId, v, tmpLastLevelNum, lastLevelNum)
+					fmt.Println("错误分红小区，配置，信息缺错误：", err, tmpUserId, tmpBuyRecords, tmpLastLevelNum, lastLevelNum)
 					continue
 				}
 
@@ -4872,6 +4870,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，recommend", vUserRecords)
 					continue
@@ -4884,6 +4886,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
@@ -4902,7 +4905,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 					return nil
 				}); nil != err {
-					fmt.Println("err reward daily area", err, v)
+					fmt.Println("err reward daily area", err, tmpBuyRecords)
 				}
 
 				if stopArea {
@@ -4963,9 +4966,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	// 直推加速
-	for _, v := range buyRecords {
-		tmpBuyRecords := v
-
+	for _, tmpBuyRecords := range buyRecords {
 		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
 			continue
 		}
@@ -5041,12 +5042,12 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			// 我的下级
 			if _, ok := myLowUser[tmpUserId]; !ok {
-				fmt.Println("错误分红加速，信息缺失3：", err, tmpUserId, v)
+				fmt.Println("错误分红加速，信息缺失3：", err, tmpUserId, tmpBuyRecords)
 				continue
 			}
 
 			if 0 >= len(myLowUser[tmpUserId]) {
-				fmt.Println("错误分红加速，信息缺失3：", err, tmpUserId, v)
+				fmt.Println("错误分红加速，信息缺失3：", err, tmpUserId, tmpBuyRecords)
 				continue
 			}
 
@@ -5098,6 +5099,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，加速", vUserRecords)
 					continue
@@ -5110,6 +5115,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
@@ -5128,7 +5134,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 					return nil
 				}); nil != err {
-					fmt.Println("err reward daily speed", err, v)
+					fmt.Println("err reward daily speed", err, tmpBuyRecords)
 				}
 
 				if stopArea {
@@ -5218,6 +5224,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停， all1", vUserRecords)
 					continue
@@ -5231,6 +5241,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
@@ -5314,6 +5325,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all2", vUserRecords)
 					continue
@@ -5327,6 +5342,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
@@ -5410,6 +5426,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all3", vUserRecords)
 					continue
@@ -5423,6 +5443,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
@@ -5506,6 +5527,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all4", vUserRecords)
 					continue
@@ -5519,6 +5544,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
@@ -5602,6 +5628,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
+				if 1 != vUserRecords.Status {
+					continue
+				}
+
 				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all5", vUserRecords)
 					continue
@@ -5615,6 +5645,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
 					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+					vUserRecords.Status = 2
 					stopArea = true
 				}
 
