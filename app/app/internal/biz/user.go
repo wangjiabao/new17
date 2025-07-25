@@ -4885,7 +4885,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
 					stopArea = true
 				} else {
-					vUserRecords.AmountGet += tmp
+					vUserRecords.AmountGet += tmpU
 				}
 
 				tmpAreaAmount -= tmpU
@@ -5111,7 +5111,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
 					stopArea = true
 				} else {
-					vUserRecords.AmountGet += tmp
+					vUserRecords.AmountGet += tmpU
 				}
 
 				tmpAreaAmount -= tmpU
