@@ -241,7 +241,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		goods    []*Good
 		goodsMap map[uint64]*Good
 	)
-	goods, err = ruc.userBalanceRepo.GetGoods(ctx)
+	goods, err = ruc.userBalanceRepo.GetGoodsOnline(ctx)
 	if nil != err {
 		return err
 	}
