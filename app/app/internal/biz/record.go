@@ -380,9 +380,25 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 	two := ""
 	three := ""
 	if "1" != user.One {
-		one = user.One + user.Two + user.Three + user.Four + user.Five
+		one += user.One
+	}
+	if "1" != user.Two {
+		one += user.Two
+	}
+	if "1" != user.Three {
+		one += user.Three
+	}
+	if "1" != user.Four {
+		one += user.Four
+	}
+	if "1" != user.Five {
+		one += user.Five
+	}
+	if "1" != user.Six {
 		two = user.Six
-		three = user.Three
+	}
+	if "1" != user.Seven {
+		three = user.Seven
 	}
 
 	four := int64(0)
