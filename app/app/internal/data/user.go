@@ -43,6 +43,13 @@ type User struct {
 	RecommendUserH         int64     `gorm:"type:int;not null"`
 	AmountFour             float64   `gorm:"type:decimal(65,20);not null"`
 	AmountFourGet          float64   `gorm:"type:decimal(65,20);not null"`
+	OneNew                 string    `gorm:"type:varchar(200)"`
+	TwoNew                 string    `gorm:"type:varchar(200)"`
+	ThreeNew               string    `gorm:"type:varchar(200)"`
+	FourNew                string    `gorm:"type:varchar(200)"`
+	FiveNew                string    `gorm:"type:varchar(200)"`
+	SixNew                 string    `gorm:"type:varchar(200)"`
+	SevenNew               string    `gorm:"type:varchar(200)"`
 }
 
 type Stake struct {
@@ -239,6 +246,16 @@ type BalanceReward struct {
 	UpdatedAt      time.Time `gorm:"type:datetime;not null"`
 }
 
+type Good struct {
+	ID        int64     `gorm:"primarykey;type:int"`
+	Amount    uint64    `gorm:"type:bigint;not null"`
+	Name      string    `gorm:"type:varchar(100);not null"`
+	One       string    `gorm:"type:varchar(250);not null"`
+	Two       string    `gorm:"type:varchar(100);not null"`
+	CreatedAt time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt time.Time `gorm:"type:datetime;not null"`
+}
+
 type BuyRecord struct {
 	ID          int64     `gorm:"primarykey;type:int"`
 	UserId      int64     `gorm:"type:int;not null"`
@@ -246,6 +263,10 @@ type BuyRecord struct {
 	LastUpdated int64     `gorm:"type:int;not null"`
 	Amount      float64   `gorm:"type:decimal(65,20);not null"`
 	AmountGet   float64   `gorm:"type:decimal(65,20);not null"`
+	One         string    `gorm:"type:varchar(500);not null"`
+	Two         string    `gorm:"type:varchar(45);not null"`
+	Three       string    `gorm:"type:varchar(45);not null"`
+	Four        int64     `gorm:"type:int;not null"`
 	CreatedAt   time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt   time.Time `gorm:"type:datetime;not null"`
 }
@@ -801,6 +822,13 @@ func (ub *UserBalanceRepo) GetAllUsersB(ctx context.Context) ([]*biz.User, error
 			RecommendUserH:         item.RecommendUserH,
 			AmountFourGet:          item.AmountFourGet,
 			AmountFour:             item.AmountFour,
+			One:                    item.OneNew,
+			Two:                    item.TwoNew,
+			Three:                  item.ThreeNew,
+			Four:                   item.FourNew,
+			Five:                   item.FiveNew,
+			Six:                    item.SixNew,
+			Seven:                  item.SevenNew,
 		})
 	}
 	return res, nil
@@ -2776,7 +2804,7 @@ func (ub *UserBalanceRepo) RecommendRewardBiw(ctx context.Context, userId int64,
 }
 
 // UpdateUserNewTwoNewTwo .
-func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64) error {
+func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error {
 	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
 		Updates(map[string]interface{}{"amount": gorm.Expr("amount + ?", amount)})
 	if res.Error != nil {
@@ -2811,6 +2839,10 @@ func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64
 	buyRecord.AmountGet = 0
 	buyRecord.Status = 1
 	buyRecord.LastUpdated = time.Now().UTC().Unix()
+	buyRecord.One = one
+	buyRecord.Two = two
+	buyRecord.Three = three
+	buyRecord.Four = four
 
 	res = ui.data.DB(ctx).Table("buy_record").Create(&buyRecord)
 	if res.Error != nil {
@@ -6023,6 +6055,54 @@ func (ub *UserBalanceRepo) GetUserBuyByUserId(ctx context.Context, userId int64)
 	return res, nil
 }
 
+// GetGoods .
+func (ub *UserBalanceRepo) GetGoods(ctx context.Context) ([]*biz.Good, error) {
+	var goods []*Good
+	res := make([]*biz.Good, 0)
+	if err := ub.data.db.Table("good").Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error())
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+		})
+	}
+
+	return res, nil
+}
+
+// GetGoodsOnline .
+func (ub *UserBalanceRepo) GetGoodsOnline(ctx context.Context) ([]*biz.Good, error) {
+	var goods []*Good
+	res := make([]*biz.Good, 0)
+	if err := ub.data.db.Table("good").Where("amount>?", 0).Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error())
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+		})
+	}
+
+	return res, nil
+}
+
 // GetUserBuy .
 func (ub *UserBalanceRepo) GetUserBuy(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.BuyRecord, error, int64) {
 	var (
@@ -6058,6 +6138,10 @@ func (ub *UserBalanceRepo) GetUserBuy(ctx context.Context, b *biz.Pagination, us
 			AmountGet:   reward.AmountGet,
 			CreatedAt:   reward.CreatedAt,
 			UpdatedAt:   reward.UpdatedAt,
+			One:         reward.One,
+			Two:         reward.Two,
+			Three:       reward.Three,
+			Four:        reward.Four,
 		})
 	}
 

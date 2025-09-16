@@ -1809,6 +1809,10 @@ func (a *AppService) AdminBuyList(ctx context.Context, req *v1.AdminBuyListReque
 	return a.uuc.AdminBuyList(ctx, req)
 }
 
+func (a *AppService) AdminGoodList(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
+	return a.uuc.AdminGoodList(ctx, req)
+}
+
 func (a *AppService) AdminLocationAllList(ctx context.Context, req *v1.AdminLocationAllListRequest) (*v1.AdminLocationAllListReply, error) {
 	return a.uuc.AdminLocationAllList(ctx, req)
 }

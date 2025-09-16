@@ -489,6 +489,12 @@ service App {
 			get: "/api/admin_dhb/buy_list"
 		};
 	};
+
+	rpc AdminGoodList (AdminGoodListRequest) returns (AdminGoodListReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/good_list"
+		};
+	};
 }
 
 message AdminSetIspayRequest {
@@ -749,6 +755,25 @@ message AdminBuyListReply {
 		string createdAt = 1; // 时间
 		string amount = 2; // 金额
 		string address = 5; // 地址
+		string one = 6; // 商品名称
+		string two = 7; // 收货地址
+		string three = 8; // 收件人手机号
+		string four = 9; // 收件人
+	}
+	int64 count = 2;
+}
+
+message AdminGoodListRequest {
+	int64 page = 1;
+}
+
+message AdminGoodListReply {
+	repeated List goods = 1;
+	message List {
+		string name = 1; // 商品名称
+		string one = 2; // 商品描述
+		string two = 3; // 商品图片
+		uint64 amount = 4; // 金额
 	}
 	int64 count = 2;
 }

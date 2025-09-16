@@ -94,6 +94,7 @@ const (
 	App_LockUserReward_FullMethodName                       = "/api.App/LockUserReward"
 	App_AdminRecommendLevelUpdate_FullMethodName            = "/api.App/AdminRecommendLevelUpdate"
 	App_AdminBuyList_FullMethodName                         = "/api.App/AdminBuyList"
+	App_AdminGoodList_FullMethodName                        = "/api.App/AdminGoodList"
 )
 
 // AppClient is the client API for App service.
@@ -175,6 +176,7 @@ type AppClient interface {
 	LockUserReward(ctx context.Context, in *LockUserRewardRequest, opts ...grpc.CallOption) (*LockUserRewardReply, error)
 	AdminRecommendLevelUpdate(ctx context.Context, in *AdminRecommendLevelRequest, opts ...grpc.CallOption) (*AdminRecommendLevelReply, error)
 	AdminBuyList(ctx context.Context, in *AdminBuyListRequest, opts ...grpc.CallOption) (*AdminBuyListReply, error)
+	AdminGoodList(ctx context.Context, in *AdminGoodListRequest, opts ...grpc.CallOption) (*AdminGoodListReply, error)
 }
 
 type appClient struct {
@@ -860,6 +862,15 @@ func (c *appClient) AdminBuyList(ctx context.Context, in *AdminBuyListRequest, o
 	return out, nil
 }
 
+func (c *appClient) AdminGoodList(ctx context.Context, in *AdminGoodListRequest, opts ...grpc.CallOption) (*AdminGoodListReply, error) {
+	out := new(AdminGoodListReply)
+	err := c.cc.Invoke(ctx, App_AdminGoodList_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServer is the server API for App service.
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility
@@ -939,6 +950,7 @@ type AppServer interface {
 	LockUserReward(context.Context, *LockUserRewardRequest) (*LockUserRewardReply, error)
 	AdminRecommendLevelUpdate(context.Context, *AdminRecommendLevelRequest) (*AdminRecommendLevelReply, error)
 	AdminBuyList(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error)
+	AdminGoodList(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -1170,6 +1182,9 @@ func (UnimplementedAppServer) AdminRecommendLevelUpdate(context.Context, *AdminR
 }
 func (UnimplementedAppServer) AdminBuyList(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminBuyList not implemented")
+}
+func (UnimplementedAppServer) AdminGoodList(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminGoodList not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 
@@ -2534,6 +2549,24 @@ func _App_AdminBuyList_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminGoodList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminGoodListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminGoodList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_AdminGoodList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminGoodList(ctx, req.(*AdminGoodListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // App_ServiceDesc is the grpc.ServiceDesc for App service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2840,6 +2873,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminBuyList",
 			Handler:    _App_AdminBuyList_Handler,
+		},
+		{
+			MethodName: "AdminGoodList",
+			Handler:    _App_AdminGoodList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

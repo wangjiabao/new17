@@ -237,6 +237,19 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		}
 	}
 
+	var (
+		goods    []*Good
+		goodsMap map[uint64]*Good
+	)
+	goods, err = ruc.userBalanceRepo.GetGoods(ctx)
+	if nil != err {
+		return err
+	}
+	goodsMap = make(map[uint64]*Good, 0)
+	for _, v := range goods {
+		goodsMap[v.Amount] = v
+	}
+
 	if 100 == amount {
 		amount = 100
 	} else if 300 == amount {
@@ -257,6 +270,10 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		amount = 50000
 	} else {
 		return nil
+	}
+
+	if _, ok := goodsMap[amount]; !ok {
+		fmt.Println("不存在金额商品", amount, eth, userId)
 	}
 
 	var (
@@ -359,9 +376,23 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		//}
 	}
 
+	one := ""
+	two := ""
+	three := ""
+	if "1" != user.One {
+		one = user.One + user.Two + user.Three + user.Four + user.Five
+		two = user.Six
+		three = user.Three
+	}
+
+	four := int64(0)
+	if _, ok := goodsMap[amount]; ok {
+		four = goodsMap[amount].ID
+	}
+
 	// 入金
 	if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = ruc.userInfoRepo.UpdateUserNewTwoNewTwo(ctx, userId, amount, float64(amount)*sendRate)
+		err = ruc.userInfoRepo.UpdateUserNewTwoNewTwo(ctx, userId, amount, float64(amount)*sendRate, one, two, three, four)
 		if nil != err {
 			return err
 		}

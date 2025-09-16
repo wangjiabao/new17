@@ -741,6 +741,29 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/good_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminGoodList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminGoodListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/level_update:
         post:
             tags:
@@ -1764,6 +1787,14 @@ components:
                     type: string
                 address:
                     type: string
+                one:
+                    type: string
+                two:
+                    type: string
+                three:
+                    type: string
+                four:
+                    type: string
         AdminChangePasswordReply:
             type: object
             properties: {}
@@ -1856,6 +1887,26 @@ components:
         AdminFeeReply:
             type: object
             properties: {}
+        AdminGoodListReply:
+            type: object
+            properties:
+                goods:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminGoodListReply_List'
+                count:
+                    type: string
+        AdminGoodListReply_List:
+            type: object
+            properties:
+                name:
+                    type: string
+                one:
+                    type: string
+                two:
+                    type: string
+                amount:
+                    type: string
         AdminListReply:
             type: object
             properties:

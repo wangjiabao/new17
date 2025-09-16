@@ -40,6 +40,7 @@ const OperationAppAdminDailyLocationRewardThree = "/api.App/AdminDailyLocationRe
 const OperationAppAdminDailyRecommendReward = "/api.App/AdminDailyRecommendReward"
 const OperationAppAdminDailyReward = "/api.App/AdminDailyReward"
 const OperationAppAdminFee = "/api.App/AdminFee"
+const OperationAppAdminGoodList = "/api.App/AdminGoodList"
 const OperationAppAdminList = "/api.App/AdminList"
 const OperationAppAdminLocationAllList = "/api.App/AdminLocationAllList"
 const OperationAppAdminLocationInsert = "/api.App/AdminLocationInsert"
@@ -117,6 +118,7 @@ type AppHTTPServer interface {
 	AdminDailyRecommendReward(context.Context, *AdminDailyRecommendRewardRequest) (*AdminDailyRecommendRewardReply, error)
 	AdminDailyReward(context.Context, *AdminDailyRewardRequest) (*AdminDailyRewardReply, error)
 	AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error)
+	AdminGoodList(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error)
 	AdminList(context.Context, *AdminListRequest) (*AdminListReply, error)
 	AdminLocationAllList(context.Context, *AdminLocationAllListRequest) (*AdminLocationAllListReply, error)
 	AdminLocationInsert(context.Context, *AdminLocationInsertRequest) (*AdminLocationInsertReply, error)
@@ -250,6 +252,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.POST("/api/admin_dhb/lock_user_reward", _App_LockUserReward0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/admin_recommend_level", _App_AdminRecommendLevelUpdate0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/buy_list", _App_AdminBuyList0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/good_list", _App_AdminGoodList0_HTTP_Handler(srv))
 }
 
 func _App_UserInfo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
@@ -1743,6 +1746,25 @@ func _App_AdminBuyList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) e
 	}
 }
 
+func _App_AdminGoodList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminGoodListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminGoodList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminGoodList(ctx, req.(*AdminGoodListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminGoodListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AppHTTPClient interface {
 	AdminAddMoney(ctx context.Context, req *AdminDailyAddMoneyRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyReply, err error)
 	AdminAddMoneyTwo(ctx context.Context, req *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyTwoReply, err error)
@@ -1765,6 +1787,7 @@ type AppHTTPClient interface {
 	AdminDailyRecommendReward(ctx context.Context, req *AdminDailyRecommendRewardRequest, opts ...http.CallOption) (rsp *AdminDailyRecommendRewardReply, err error)
 	AdminDailyReward(ctx context.Context, req *AdminDailyRewardRequest, opts ...http.CallOption) (rsp *AdminDailyRewardReply, err error)
 	AdminFee(ctx context.Context, req *AdminFeeRequest, opts ...http.CallOption) (rsp *AdminFeeReply, err error)
+	AdminGoodList(ctx context.Context, req *AdminGoodListRequest, opts ...http.CallOption) (rsp *AdminGoodListReply, err error)
 	AdminList(ctx context.Context, req *AdminListRequest, opts ...http.CallOption) (rsp *AdminListReply, err error)
 	AdminLocationAllList(ctx context.Context, req *AdminLocationAllListRequest, opts ...http.CallOption) (rsp *AdminLocationAllListReply, err error)
 	AdminLocationInsert(ctx context.Context, req *AdminLocationInsertRequest, opts ...http.CallOption) (rsp *AdminLocationInsertReply, err error)
@@ -2094,6 +2117,19 @@ func (c *AppHTTPClientImpl) AdminFee(ctx context.Context, in *AdminFeeRequest, o
 	pattern := "/api/admin_dhb/fee"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppAdminFee))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminGoodList(ctx context.Context, in *AdminGoodListRequest, opts ...http.CallOption) (*AdminGoodListReply, error) {
+	var out AdminGoodListReply
+	pattern := "/api/admin_dhb/good_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminGoodList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

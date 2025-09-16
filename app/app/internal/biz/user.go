@@ -49,6 +49,13 @@ type User struct {
 	RecommendUserReward    int64
 	RecommendUser          int64
 	RecommendUserH         int64
+	One                    string
+	Two                    string
+	Three                  string
+	Four                   string
+	Five                   string
+	Six                    string
+	Seven                  string
 }
 
 type Stake struct {
@@ -260,8 +267,20 @@ type BuyRecord struct {
 	LastUpdated int64
 	Amount      float64
 	AmountGet   float64
+	One         string
+	Two         string
+	Three       string
+	Four        int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type Good struct {
+	ID     int64
+	Amount uint64
+	Name   string
+	One    string
+	Two    string
 }
 
 type ConfigRepo interface {
@@ -317,6 +336,8 @@ type UserBalanceRepo interface {
 	GetUserRewardByUserId(ctx context.Context, userId int64) ([]*Reward, error)
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
 	GetUserBuy(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
+	GetGoods(ctx context.Context) ([]*Good, error)
+	GetGoodsOnline(ctx context.Context) ([]*Good, error)
 	GetUserBuyByUserId(ctx context.Context, userId int64) ([]*BuyRecord, error)
 	GetUserBuyById(id int64) (*BuyRecord, error)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
@@ -414,7 +435,7 @@ type UserCurrentMonthRecommendRepo interface {
 }
 
 type UserInfoRepo interface {
-	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64) error
+	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
 	UpdateUserRewardStakeReomve(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardStake(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardNew(ctx context.Context, id, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool) (int64, error)
@@ -921,6 +942,8 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 		userIds     []int64
 		err         error
 		count       int64
+		goods       []*Good
+		goodsMap    map[int64]*Good
 	)
 	res := &v1.AdminBuyListReply{
 		Rewards: make([]*v1.AdminBuyListReply_List, 0),
@@ -952,6 +975,15 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 		userIds = append(userIds, v)
 	}
 
+	goods, err = uuc.ubRepo.GetGoods(ctx)
+	if nil != err {
+		return nil, err
+	}
+	goodsMap = make(map[int64]*Good, 0)
+	for _, v := range goods {
+		goodsMap[v.ID] = v
+	}
+
 	users, err = uuc.repo.GetUserByUserIds(ctx, userIds...)
 	for _, vUserReward := range userRewards {
 		tmpUser := ""
@@ -961,11 +993,62 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 			}
 		}
 
+		oneTmp := ""
+		if "1" != vUserReward.One {
+			oneTmp = vUserReward.One
+		}
+		twoTmp := ""
+		if "1" != vUserReward.One {
+			twoTmp = vUserReward.Two
+		}
+		threeTmp := ""
+		if "1" != vUserReward.One {
+			threeTmp = vUserReward.Three
+		}
+		fourTmp := ""
+		if 0 != vUserReward.Four {
+			if _, ok := goodsMap[vUserReward.Four]; ok {
+				fourTmp = goodsMap[vUserReward.Four].Name
+			}
+		}
+
 		res.Rewards = append(res.Rewards, &v1.AdminBuyListReply_List{
 			CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
 			Amount:    fmt.Sprintf("%.2f", vUserReward.Amount),
 			Address:   tmpUser,
 			Id:        vUserReward.ID,
+			One:       fourTmp,
+			Two:       oneTmp,
+			Three:     twoTmp,
+			Four:      threeTmp,
+		})
+	}
+
+	return res, nil
+}
+
+func (uuc *UserUseCase) AdminGoodList(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
+
+	var (
+		goods []*Good
+		err   error
+	)
+	res := &v1.AdminGoodListReply{
+		Goods: make([]*v1.AdminGoodListReply_List, 0),
+		Count: 1,
+	}
+
+	goods, err = uuc.ubRepo.GetGoods(ctx)
+	if nil != err {
+		return nil, err
+	}
+
+	for _, v := range goods {
+		res.Goods = append(res.Goods, &v1.AdminGoodListReply_List{
+			Name:   v.Name,
+			One:    v.One,
+			Two:    v.Two,
+			Amount: v.Amount,
 		})
 	}
 
