@@ -1907,6 +1907,8 @@ components:
                     type: string
                 amount:
                     type: string
+                three:
+                    type: string
         AdminListReply:
             type: object
             properties:

@@ -774,6 +774,7 @@ message AdminGoodListReply {
 		string one = 2; // 商品描述
 		string two = 3; // 商品图片
 		uint64 amount = 4; // 金额
+		string three = 5; // 详情
 	}
 	int64 count = 2;
 }

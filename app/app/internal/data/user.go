@@ -252,6 +252,7 @@ type Good struct {
 	Name      string    `gorm:"type:varchar(100);not null"`
 	One       string    `gorm:"type:varchar(250);not null"`
 	Two       string    `gorm:"type:varchar(100);not null"`
+	Three     string    `gorm:"type:varchar(500);not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -6073,6 +6074,7 @@ func (ub *UserBalanceRepo) GetGoods(ctx context.Context) ([]*biz.Good, error) {
 			Name:   good.Name,
 			One:    good.One,
 			Two:    good.Two,
+			Three:  good.Three,
 		})
 	}
 
