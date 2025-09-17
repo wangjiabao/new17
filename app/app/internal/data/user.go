@@ -253,6 +253,7 @@ type Good struct {
 	One       string    `gorm:"type:varchar(250);not null"`
 	Two       string    `gorm:"type:varchar(100);not null"`
 	Three     string    `gorm:"type:varchar(500);not null"`
+	Status    int64     `gorm:"type:int;not null"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -6079,6 +6080,23 @@ func (ub *UserBalanceRepo) GetGoods(ctx context.Context) ([]*biz.Good, error) {
 	}
 
 	return res, nil
+}
+
+// CreateGoods .
+func (u *UserRepo) CreateGoods(ctx context.Context, one, name, picName, three string, amount uint64) error {
+	var good Good
+	good.Status = 0
+	good.Name = name
+	good.One = one
+	good.Two = picName
+	good.Three = three
+	good.Amount = amount
+	res := u.data.DB(ctx).Table("goods").Create(&good)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_USER_INFO_ERROR", "用户信息创建失败")
+	}
+
+	return nil
 }
 
 // GetGoodsOnline .

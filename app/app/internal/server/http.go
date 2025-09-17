@@ -43,6 +43,11 @@ func NewHTTPServer(c *conf.Server, app *service.AppService, logger log.Logger) *
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterAppHTTPServer(srv, app)
+
+	//路由注册
+	route := srv.Route("/api/admin_dhb")
+	//图片上传
+	route.POST("/upload", app.Upload)
 	return srv
 }
 

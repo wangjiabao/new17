@@ -9,8 +9,11 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
+	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
 	jwt2 "github.com/golang-jwt/jwt/v5"
+	"io"
 	"math"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -482,6 +485,7 @@ type UserInfoRepo interface {
 }
 
 type UserRepo interface {
+	CreateGoods(ctx context.Context, one, name, picName, three string, amount uint64) error
 	GetRewardYes(ctx context.Context) ([]*Reward, error)
 	GetUsersNewTwo(ctx context.Context) ([]*User, error)
 	GetUserById(ctx context.Context, Id int64) (*User, error)
@@ -11157,4 +11161,69 @@ func (uuc *UserUseCase) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdm
 
 func (uuc *UserUseCase) CheckAndInsertLocationsRecommendUser(ctx context.Context, req *v1.CheckAndInsertLocationsRecommendUserRequest) (*v1.CheckAndInsertLocationsRecommendUserReply, error) {
 	return &v1.CheckAndInsertLocationsRecommendUserReply{}, nil
+}
+
+func (uuc *UserUseCase) Upload(ctx transporthttp.Context) (err error) {
+
+	name := ctx.Request().FormValue("name")
+	detail := ctx.Request().FormValue("one")
+	amount := ctx.Request().FormValue("amount")
+	three := ctx.Request().FormValue("three")
+	amountInt64, _ := strconv.ParseUint(amount, 10, 64)
+	if 0 >= amountInt64 {
+		return nil
+	}
+
+	if 100 == amountInt64 {
+		amountInt64 = 100
+	} else if 300 == amountInt64 {
+		amountInt64 = 300
+	} else if 500 == amountInt64 {
+		amountInt64 = 500
+	} else if 1000 == amountInt64 {
+		amountInt64 = 1000
+	} else if 5000 == amountInt64 {
+		amountInt64 = 5000
+	} else if 10000 == amountInt64 {
+		amountInt64 = 10000
+	} else if 15000 == amountInt64 {
+		amountInt64 = 15000
+	} else if 30000 == amountInt64 {
+		amountInt64 = 30000
+	} else if 50000 == amountInt64 {
+		amountInt64 = 50000
+	} else if 100000 == amountInt64 {
+		amountInt64 = 100000
+	} else if 150000 == amountInt64 {
+		amountInt64 = 150000
+	} else {
+		return nil
+	}
+
+	file, _, err := ctx.Request().FormFile("file")
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	picName := time.Now().Format("20060102150405") + ".png"
+	// 修改文件名并创建保存图片
+	imageFile, err := os.Create("/www/wwwroot/www.ispayplay.com/images/" + picName)
+	if err != nil {
+		return
+	}
+	defer imageFile.Close()
+
+	// 将文件内容复制到保存的文件中
+	_, err = io.Copy(imageFile, file)
+	if err != nil {
+		return
+	}
+
+	err = uuc.repo.CreateGoods(ctx, detail, name, picName, three, amountInt64)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

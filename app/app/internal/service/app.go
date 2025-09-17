@@ -13,6 +13,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
+	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
 	jwt2 "github.com/golang-jwt/jwt/v5"
 	"io"
 	"math/big"
@@ -183,6 +184,11 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	}
 
 	return &v1.DepositReply{}, nil
+}
+
+// Upload upload .
+func (a *AppService) Upload(ctx transporthttp.Context) (err error) {
+	return a.uuc.Upload(ctx)
 }
 
 func (a *AppService) AdminDailyReward(ctx context.Context, req *v1.AdminDailyRewardRequest) (*v1.AdminDailyRewardReply, error) {
