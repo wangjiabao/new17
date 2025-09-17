@@ -485,6 +485,7 @@ type UserInfoRepo interface {
 }
 
 type UserRepo interface {
+	UpdateGoods(ctx context.Context, id, status uint64) error
 	CreateGoods(ctx context.Context, one, name, picName, three string, amount uint64) error
 	GetRewardYes(ctx context.Context) ([]*Reward, error)
 	GetUsersNewTwo(ctx context.Context) ([]*User, error)
@@ -11161,6 +11162,11 @@ func (uuc *UserUseCase) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdm
 
 func (uuc *UserUseCase) CheckAndInsertLocationsRecommendUser(ctx context.Context, req *v1.CheckAndInsertLocationsRecommendUserRequest) (*v1.CheckAndInsertLocationsRecommendUserReply, error) {
 	return &v1.CheckAndInsertLocationsRecommendUserReply{}, nil
+}
+
+// AdminCreateGoods 处理 HTTP 文件上传请求
+func (uuc *UserUseCase) AdminCreateGoods(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
+	return nil, uuc.repo.UpdateGoods(ctx, req.SendBody.Id, req.SendBody.Status)
 }
 
 func (uuc *UserUseCase) Upload(ctx transporthttp.Context) (err error) {

@@ -495,6 +495,24 @@ service App {
 			get: "/api/admin_dhb/good_list"
 		};
 	};
+
+	rpc AdminCreateGoods (AdminCreateGoodsRequest) returns (AdminCreateGoodsReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/update_goods"
+			body: "send_body"
+		};
+	};
+}
+
+message AdminCreateGoodsRequest {
+	message SendBody {
+		uint64 id = 2;
+		uint64 status = 1;
+	}
+	SendBody send_body = 1;
+}
+
+message AdminCreateGoodsReply {
 }
 
 message AdminSetIspayRequest {

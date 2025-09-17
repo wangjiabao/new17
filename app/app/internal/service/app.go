@@ -191,6 +191,11 @@ func (a *AppService) Upload(ctx transporthttp.Context) (err error) {
 	return a.uuc.Upload(ctx)
 }
 
+// AdminCreateGoods 处理 HTTP 文件上传请求
+func (a *AppService) AdminCreateGoods(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
+	return a.uuc.AdminCreateGoods(ctx, req)
+}
+
 func (a *AppService) AdminDailyReward(ctx context.Context, req *v1.AdminDailyRewardRequest) (*v1.AdminDailyRewardReply, error) {
 	return a.uuc.AdminDailyReward(ctx, req)
 }

@@ -31,6 +31,7 @@ const OperationAppAdminConfig = "/api.App/AdminConfig"
 const OperationAppAdminConfigUpdate = "/api.App/AdminConfigUpdate"
 const OperationAppAdminConfigUpdateListen = "/api.App/AdminConfigUpdateListen"
 const OperationAppAdminCreateAccount = "/api.App/AdminCreateAccount"
+const OperationAppAdminCreateGoods = "/api.App/AdminCreateGoods"
 const OperationAppAdminDailyAreaReward = "/api.App/AdminDailyAreaReward"
 const OperationAppAdminDailyBalanceReward = "/api.App/AdminDailyBalanceReward"
 const OperationAppAdminDailyFee = "/api.App/AdminDailyFee"
@@ -109,6 +110,7 @@ type AppHTTPServer interface {
 	AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error)
 	AdminConfigUpdateListen(context.Context, *AdminConfigUpdateListenRequest) (*AdminConfigUpdateListenReply, error)
 	AdminCreateAccount(context.Context, *AdminCreateAccountRequest) (*AdminCreateAccountReply, error)
+	AdminCreateGoods(context.Context, *AdminCreateGoodsRequest) (*AdminCreateGoodsReply, error)
 	AdminDailyAreaReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
 	AdminDailyBalanceReward(context.Context, *AdminDailyBalanceRewardRequest) (*AdminDailyBalanceRewardReply, error)
 	AdminDailyFee(context.Context, *AdminDailyFeeRequest) (*AdminDailyFeeReply, error)
@@ -253,6 +255,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.POST("/api/admin_dhb/admin_recommend_level", _App_AdminRecommendLevelUpdate0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/buy_list", _App_AdminBuyList0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/good_list", _App_AdminGoodList0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/update_goods", _App_AdminCreateGoods0_HTTP_Handler(srv))
 }
 
 func _App_UserInfo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
@@ -1765,6 +1768,28 @@ func _App_AdminGoodList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) 
 	}
 }
 
+func _App_AdminCreateGoods0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminCreateGoodsRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminCreateGoods)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminCreateGoods(ctx, req.(*AdminCreateGoodsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminCreateGoodsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AppHTTPClient interface {
 	AdminAddMoney(ctx context.Context, req *AdminDailyAddMoneyRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyReply, err error)
 	AdminAddMoneyTwo(ctx context.Context, req *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyTwoReply, err error)
@@ -1778,6 +1803,7 @@ type AppHTTPClient interface {
 	AdminConfigUpdate(ctx context.Context, req *AdminConfigUpdateRequest, opts ...http.CallOption) (rsp *AdminConfigUpdateReply, err error)
 	AdminConfigUpdateListen(ctx context.Context, req *AdminConfigUpdateListenRequest, opts ...http.CallOption) (rsp *AdminConfigUpdateListenReply, err error)
 	AdminCreateAccount(ctx context.Context, req *AdminCreateAccountRequest, opts ...http.CallOption) (rsp *AdminCreateAccountReply, err error)
+	AdminCreateGoods(ctx context.Context, req *AdminCreateGoodsRequest, opts ...http.CallOption) (rsp *AdminCreateGoodsReply, err error)
 	AdminDailyAreaReward(ctx context.Context, req *AdminDailyLocationRewardRequest, opts ...http.CallOption) (rsp *AdminDailyLocationRewardReply, err error)
 	AdminDailyBalanceReward(ctx context.Context, req *AdminDailyBalanceRewardRequest, opts ...http.CallOption) (rsp *AdminDailyBalanceRewardReply, err error)
 	AdminDailyFee(ctx context.Context, req *AdminDailyFeeRequest, opts ...http.CallOption) (rsp *AdminDailyFeeReply, err error)
@@ -2000,6 +2026,19 @@ func (c *AppHTTPClientImpl) AdminCreateAccount(ctx context.Context, in *AdminCre
 	pattern := "/api/admin_dhb/create_account"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAppAdminCreateAccount))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminCreateGoods(ctx context.Context, in *AdminCreateGoodsRequest, opts ...http.CallOption) (*AdminCreateGoodsReply, error) {
+	var out AdminCreateGoodsReply
+	pattern := "/api/admin_dhb/update_goods"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAppAdminCreateGoods))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {

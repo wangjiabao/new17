@@ -6082,6 +6082,20 @@ func (ub *UserBalanceRepo) GetGoods(ctx context.Context) ([]*biz.Good, error) {
 	return res, nil
 }
 
+// UpdateGoods .
+func (u *UserRepo) UpdateGoods(ctx context.Context, id, status uint64) error {
+	var (
+		err error
+	)
+	if err = u.data.DB(ctx).Table("good").
+		Where("id=?", id).
+		Updates(map[string]interface{}{"status": status}).Error; nil != err {
+		return errors.NotFound("goods err", "goods not found")
+	}
+
+	return nil
+}
+
 // CreateGoods .
 func (u *UserRepo) CreateGoods(ctx context.Context, one, name, picName, three string, amount uint64) error {
 	var good Good
@@ -6091,7 +6105,7 @@ func (u *UserRepo) CreateGoods(ctx context.Context, one, name, picName, three st
 	good.Two = picName
 	good.Three = three
 	good.Amount = amount
-	res := u.data.DB(ctx).Table("goods").Create(&good)
+	res := u.data.DB(ctx).Table("good").Create(&good)
 	if res.Error != nil {
 		return errors.New(500, "CREATE_USER_INFO_ERROR", "用户信息创建失败")
 	}
