@@ -1046,6 +1046,7 @@ func (uuc *UserUseCase) AdminGoodList(ctx context.Context, req *v1.AdminGoodList
 
 	for _, v := range goods {
 		res.Goods = append(res.Goods, &v1.AdminGoodListReply_List{
+			Id:     v.ID,
 			Name:   v.Name,
 			One:    v.One,
 			Two:    v.Two,

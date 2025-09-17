@@ -770,6 +770,7 @@ message AdminGoodListRequest {
 message AdminGoodListReply {
 	repeated List goods = 1;
 	message List {
+		int64 id = 6;
 		string name = 1; // 商品名称
 		string one = 2; // 商品描述
 		string two = 3; // 商品图片
