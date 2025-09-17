@@ -268,6 +268,10 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		amount = 30000
 	} else if 50000 == amount {
 		amount = 50000
+	} else if 100000 == amount {
+		amount = 100000
+	} else if 150000 == amount {
+		amount = 150000
 	} else {
 		return nil
 	}
