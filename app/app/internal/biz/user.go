@@ -339,6 +339,7 @@ type UserBalanceRepo interface {
 	GetUserBuy(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
 	GetGoods(ctx context.Context) ([]*Good, error)
 	GetGoodsOnline(ctx context.Context) ([]*Good, error)
+	GetGoodsPage(ctx context.Context, b *Pagination) ([]*Good, error, int64)
 	GetUserBuyByUserId(ctx context.Context, userId int64) ([]*BuyRecord, error)
 	GetUserBuyById(id int64) (*BuyRecord, error)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
@@ -1032,17 +1033,21 @@ func (uuc *UserUseCase) AdminGoodList(ctx context.Context, req *v1.AdminGoodList
 
 	var (
 		goods []*Good
+		count int64
 		err   error
 	)
 	res := &v1.AdminGoodListReply{
 		Goods: make([]*v1.AdminGoodListReply_List, 0),
-		Count: 1,
 	}
 
-	goods, err = uuc.ubRepo.GetGoods(ctx)
+	goods, err, count = uuc.ubRepo.GetGoodsPage(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
 	if nil != err {
-		return nil, err
+		return res, nil
 	}
+	res.Count = count
 
 	for _, v := range goods {
 		res.Goods = append(res.Goods, &v1.AdminGoodListReply_List{

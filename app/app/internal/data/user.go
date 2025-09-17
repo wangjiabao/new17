@@ -6105,6 +6105,38 @@ func (ub *UserBalanceRepo) GetGoodsOnline(ctx context.Context) ([]*biz.Good, err
 	return res, nil
 }
 
+// GetGoodsPage .
+func (ub *UserBalanceRepo) GetGoodsPage(ctx context.Context, b *biz.Pagination) ([]*biz.Good, error, int64) {
+	var (
+		count int64
+		goods []*Good
+	)
+	res := make([]*biz.Good, 0)
+
+	instance := ub.data.db.Table("good")
+	instance = instance.Count(&count)
+
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found"), 0
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error()), 0
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+			Three:  good.Three,
+		})
+	}
+
+	return res, nil, count
+}
+
 // GetUserBuy .
 func (ub *UserBalanceRepo) GetUserBuy(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.BuyRecord, error, int64) {
 	var (
