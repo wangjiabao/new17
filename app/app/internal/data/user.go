@@ -6163,6 +6163,7 @@ func (ub *UserBalanceRepo) GetGoodsPage(ctx context.Context, b *biz.Pagination) 
 			One:    good.One,
 			Two:    good.Two,
 			Three:  good.Three,
+			Status: uint64(good.Status),
 		})
 	}
 

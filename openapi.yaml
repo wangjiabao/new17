@@ -1945,6 +1945,8 @@ components:
                     type: string
                 three:
                     type: string
+                status:
+                    type: string
         AdminListReply:
             type: object
             properties:

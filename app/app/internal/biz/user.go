@@ -285,6 +285,7 @@ type Good struct {
 	One    string
 	Two    string
 	Three  string
+	Status uint64
 }
 
 type ConfigRepo interface {
@@ -1062,6 +1063,7 @@ func (uuc *UserUseCase) AdminGoodList(ctx context.Context, req *v1.AdminGoodList
 			Two:    v.Two,
 			Amount: v.Amount,
 			Three:  v.Three,
+			Status: v.Status,
 		})
 	}
 
