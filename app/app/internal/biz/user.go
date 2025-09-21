@@ -4352,6 +4352,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		sevenRate           float64
 		eightRate           float64
 		nineRate            float64
+		oneOneRate          float64
+		oneTwoRate          float64
 		recommendTwoRate    float64
 		recommendTwoRateSub float64
 		areaOne             float64
@@ -4368,6 +4370,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	// 配置
 	configs, err = uuc.configRepo.GetConfigByKeys(ctx,
 		"buy_one", "buy_two", "buy_three", "buy_four", "buy_five", "buy_six", "buy_seven", "buy_eight", "buy_nine",
+		"buy_one_one", "buy_one_two",
 		"recommend_two", "recommend_two_sub",
 		"area_one", "area_two", "area_three", "area_four", "area_five", "area_zero",
 		"all_each",
@@ -4405,6 +4408,12 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		}
 		if "buy_nine" == vConfig.KeyName {
 			nineRate, _ = strconv.ParseFloat(vConfig.Value, 10)
+		}
+		if "buy_one_one" == vConfig.KeyName {
+			oneOneRate, _ = strconv.ParseFloat(vConfig.Value, 10)
+		}
+		if "buy_one_two" == vConfig.KeyName {
+			oneTwoRate, _ = strconv.ParseFloat(vConfig.Value, 10)
 		}
 		if "recommend_two" == vConfig.KeyName {
 			recommendTwoRate, _ = strconv.ParseFloat(vConfig.Value, 10)
@@ -4619,7 +4628,11 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		}
 
 		numTwo := float64(0)
-		if 50000 <= tmpBuyRecords.Amount {
+		if 150000 <= tmpBuyRecords.Amount {
+			numTwo = oneTwoRate
+		} else if 100000 <= tmpBuyRecords.Amount {
+			numTwo = oneOneRate
+		} else if 50000 <= tmpBuyRecords.Amount {
 			numTwo = nineRate
 		} else if 30000 <= tmpBuyRecords.Amount {
 			numTwo = eightRate
@@ -4723,7 +4736,11 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		}
 
 		numTwo := float64(0)
-		if 50000 <= tmpBuyRecords.Amount {
+		if 150000 <= tmpBuyRecords.Amount {
+			numTwo = oneTwoRate
+		} else if 100000 <= tmpBuyRecords.Amount {
+			numTwo = oneOneRate
+		} else if 50000 <= tmpBuyRecords.Amount {
 			numTwo = nineRate
 		} else if 30000 <= tmpBuyRecords.Amount {
 			numTwo = eightRate
@@ -5072,7 +5089,11 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		}
 
 		numTwo := float64(0)
-		if 50000 <= tmpBuyRecords.Amount {
+		if 150000 <= tmpBuyRecords.Amount {
+			numTwo = oneTwoRate
+		} else if 100000 <= tmpBuyRecords.Amount {
+			numTwo = oneOneRate
+		} else if 50000 <= tmpBuyRecords.Amount {
 			numTwo = nineRate
 		} else if 30000 <= tmpBuyRecords.Amount {
 			numTwo = eightRate

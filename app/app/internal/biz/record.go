@@ -197,7 +197,7 @@ func (ruc *RecordUseCase) GetGlobalLock(ctx context.Context) (*GlobalLock, error
 
 var lockAll sync.Mutex
 
-func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount uint64, eth *EthUserRecord, system bool) error {
+func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId, pId int64, amount uint64, eth *EthUserRecord, system bool) error {
 	lockAll.Lock()
 	defer lockAll.Unlock()
 
@@ -239,15 +239,15 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 
 	var (
 		goods    []*Good
-		goodsMap map[uint64]*Good
+		goodsMap map[int64]*Good
 	)
 	goods, err = ruc.userBalanceRepo.GetGoodsOnline(ctx)
 	if nil != err {
 		return err
 	}
-	goodsMap = make(map[uint64]*Good, 0)
+	goodsMap = make(map[int64]*Good, 0)
 	for _, v := range goods {
-		goodsMap[v.Amount] = v
+		goodsMap[v.ID] = v
 	}
 
 	if 100 == amount {
@@ -274,10 +274,6 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 		amount = 150000
 	} else {
 		return nil
-	}
-
-	if _, ok := goodsMap[amount]; !ok {
-		fmt.Println("不存在金额商品", amount, eth, userId)
 	}
 
 	var (
@@ -406,8 +402,10 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId int64, amount u
 	}
 
 	four := int64(0)
-	if _, ok := goodsMap[amount]; ok {
-		four = goodsMap[amount].ID
+	if _, ok := goodsMap[pId]; ok {
+		four = goodsMap[pId].ID
+	} else {
+		fmt.Println("不存在商品", amount, eth, userId, pId)
 	}
 
 	// 入金

@@ -108,7 +108,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 		// 0x0299e92df88c034F6425e78b6f6A367e84160B45 test
 		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
-		userLength, err = getUserLength("0x7D0c989Ec68dC09fc1d6c6222079d78733B02Ceb")
+		userLength, err = getUserLength("0x49c735D94e1cc44053D23c956972cB37da3Fd5Af")
 		if nil != err {
 			fmt.Println(err)
 		}
@@ -127,7 +127,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 		// 0x0299e92df88c034F6425e78b6f6A367e84160B454 test
 		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
-		depositUsdtResult, err = getUserInfo(last, userLength-1, "0x7D0c989Ec68dC09fc1d6c6222079d78733B02Ceb")
+		depositUsdtResult, err = getUserInfo(last, userLength-1, "0x49c735D94e1cc44053D23c956972cB37da3Fd5Af")
 		if nil != err {
 			break
 		}
@@ -165,7 +165,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 				}
 
 				// 充值
-				err = a.ruc.DepositNew(ctx, depositUsers[vUser.Address].ID, uint64(tmpValue), &biz.EthUserRecord{ // 两种币的记录
+				err = a.ruc.DepositNew(ctx, depositUsers[vUser.Address].ID, vUser.Id, uint64(tmpValue), &biz.EthUserRecord{ // 两种币的记录
 					UserId:    depositUsers[vUser.Address].ID,
 					Status:    "success",
 					Type:      "deposit",
@@ -1089,7 +1089,7 @@ func (a *AppService) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAdd
 	}
 
 	// 充值
-	err = a.ruc.DepositNew(ctx, user.ID, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
+	err = a.ruc.DepositNew(ctx, user.ID, 0, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
 		UserId:    user.ID,
 		Status:    "success",
 		Type:      "deposit",
@@ -2692,6 +2692,7 @@ func getUserLength(address string) (int64, error) {
 type userDeposit struct {
 	Address string
 	Amount  int64
+	Id      int64
 }
 
 func getUserInfo(start int64, end int64, address string) ([]*userDeposit, error) {
@@ -2700,6 +2701,7 @@ func getUserInfo(start int64, end int64, address string) ([]*userDeposit, error)
 	var (
 		bals  []common.Address
 		bals2 []*big.Int
+		bals3 []*big.Int
 	)
 	users := make([]*userDeposit, 0)
 
@@ -2771,7 +2773,41 @@ func getUserInfo(start int64, end int64, address string) ([]*userDeposit, error)
 		break
 	}
 
-	if len(bals) != len(bals2) {
+	for i := 0; i < 5; i++ {
+		if 1 == i {
+			url1 = "https://binance.llamarpc.com/"
+		} else if 2 == i {
+			url1 = "https://bscrpc.com/"
+		} else if 3 == i {
+			url1 = "https://bsc-pokt.nodies.app/"
+		} else if 4 == i {
+			url1 = "https://data-seed-prebsc-1-s3.binance.org:8545/"
+		}
+
+		client, err := ethclient.Dial(url1)
+		if err != nil {
+			fmt.Println(nil, err)
+			continue
+		}
+
+		tokenAddress := common.HexToAddress(address)
+		instance, err := NewBuySomething(tokenAddress, client)
+		if err != nil {
+			fmt.Println(nil, err)
+			continue
+		}
+
+		bals3, err = instance.GetIdsByIndex(&bind.CallOpts{}, new(big.Int).SetInt64(start), new(big.Int).SetInt64(end))
+		if err != nil {
+			fmt.Println(err)
+			//url1 = "https://bsc-dataseed4.binance.org"
+			continue
+		}
+
+		break
+	}
+
+	if len(bals) != len(bals2) && len(bals) != len(bals3) {
 		fmt.Println("数量不一致，错误")
 		return users, nil
 	}
@@ -2780,6 +2816,7 @@ func getUserInfo(start int64, end int64, address string) ([]*userDeposit, error)
 		users = append(users, &userDeposit{
 			Address: v.String(),
 			Amount:  bals2[k].Int64(),
+			Id:      bals3[k].Int64(),
 		})
 	}
 
