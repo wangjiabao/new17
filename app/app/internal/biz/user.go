@@ -4365,6 +4365,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		allEach             float64
 		uRate               float64
 		bRate               float64
+		openReward          uint64
 		err                 error
 	)
 	// 配置
@@ -4376,6 +4377,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		"all_each",
 		"u_rate",
 		"b_rate",
+		"open_reward",
 	)
 	if nil != err || nil == configs {
 		fmt.Println("错误分红，配置", err)
@@ -4448,6 +4450,14 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		if "b_rate" == vConfig.KeyName {
 			bRate, _ = strconv.ParseFloat(vConfig.Value, 10)
 		}
+		if "open_reward" == vConfig.KeyName {
+			openReward, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+		}
+	}
+
+	if 1 != openReward {
+		fmt.Println("关闭分红", openReward)
+		return &v1.AdminDailyRewardReply{}, nil
 	}
 
 	var (
