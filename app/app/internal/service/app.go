@@ -1110,6 +1110,40 @@ func (a *AppService) AdminRecommendLevelUpdate(ctx context.Context, req *v1.Admi
 	return a.uuc.AdminRecommendLevelUpdate(ctx, req)
 }
 
+// AdminAddMoneyThree  .
+func (a *AppService) AdminAddMoneyThree(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
+
+	var (
+		user *biz.User
+		err  error
+	)
+
+	user, err = a.uuc.GetUserByAddressTwo(ctx, req.SendBody.Address)
+	if nil != err || nil == user {
+		return nil, err
+	}
+
+	if user.Address != req.SendBody.Address {
+		return nil, nil
+	}
+
+	// 充值
+	err = a.ruc.DepositNew(ctx, user.ID, 0, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
+		UserId:    user.ID,
+		Status:    "success",
+		Type:      "deposit",
+		RelAmount: req.SendBody.Usdt,
+		Amount:    strconv.FormatInt(req.SendBody.Usdt, 10) + "00000000000000000000",
+		CoinType:  "USDT",
+		Last:      99999,
+	}, true)
+	if nil != err {
+		fmt.Println(err)
+	}
+
+	return nil, nil
+}
+
 // Deposit5 deposit5.
 func (a *AppService) Deposit5(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
 	//

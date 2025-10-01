@@ -20,6 +20,7 @@ var _ = binding.EncodeURL
 const _ = http.SupportPackageIsVersion1
 
 const OperationAppAdminAddMoney = "/api.App/AdminAddMoney"
+const OperationAppAdminAddMoneyThree = "/api.App/AdminAddMoneyThree"
 const OperationAppAdminAddMoneyTwo = "/api.App/AdminAddMoneyTwo"
 const OperationAppAdminAll = "/api.App/AdminAll"
 const OperationAppAdminAmountFourUpdate = "/api.App/AdminAmountFourUpdate"
@@ -99,6 +100,7 @@ const OperationAppWithdrawList = "/api.App/WithdrawList"
 
 type AppHTTPServer interface {
 	AdminAddMoney(context.Context, *AdminDailyAddMoneyRequest) (*AdminDailyAddMoneyReply, error)
+	AdminAddMoneyThree(context.Context, *AdminDailyAddMoneyTwoRequest) (*AdminDailyAddMoneyTwoReply, error)
 	AdminAddMoneyTwo(context.Context, *AdminDailyAddMoneyTwoRequest) (*AdminDailyAddMoneyTwoReply, error)
 	AdminAll(context.Context, *AdminAllRequest) (*AdminAllReply, error)
 	AdminAmountFourUpdate(context.Context, *AdminAmountFourRequest) (*AdminAmountFourReply, error)
@@ -247,6 +249,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/daily_location_reward_new", _App_AdminDailyLocationRewardNew0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/add_money", _App_AdminAddMoney0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/add_money_two", _App_AdminAddMoneyTwo0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/add_money_three", _App_AdminAddMoneyThree0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/set_ispay", _App_AdminSetIspay0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/sub_money", _App_AdminSubMoney0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/test_money", _App_TestMoney0_HTTP_Handler(srv))
@@ -1607,6 +1610,28 @@ func _App_AdminAddMoneyTwo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _App_AdminAddMoneyThree0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminDailyAddMoneyTwoRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminAddMoneyThree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminAddMoneyThree(ctx, req.(*AdminDailyAddMoneyTwoRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminDailyAddMoneyTwoReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _App_AdminSetIspay0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in AdminSetIspayRequest
@@ -1792,6 +1817,7 @@ func _App_AdminCreateGoods0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Contex
 
 type AppHTTPClient interface {
 	AdminAddMoney(ctx context.Context, req *AdminDailyAddMoneyRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyReply, err error)
+	AdminAddMoneyThree(ctx context.Context, req *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyTwoReply, err error)
 	AdminAddMoneyTwo(ctx context.Context, req *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyTwoReply, err error)
 	AdminAll(ctx context.Context, req *AdminAllRequest, opts ...http.CallOption) (rsp *AdminAllReply, err error)
 	AdminAmountFourUpdate(ctx context.Context, req *AdminAmountFourRequest, opts ...http.CallOption) (rsp *AdminAmountFourReply, err error)
@@ -1883,6 +1909,19 @@ func (c *AppHTTPClientImpl) AdminAddMoney(ctx context.Context, in *AdminDailyAdd
 	pattern := "/api/admin_dhb/add_money"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAppAdminAddMoney))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminAddMoneyThree(ctx context.Context, in *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (*AdminDailyAddMoneyTwoReply, error) {
+	var out AdminDailyAddMoneyTwoReply
+	pattern := "/api/admin_dhb/add_money_three"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAppAdminAddMoneyThree))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {

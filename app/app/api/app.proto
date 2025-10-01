@@ -445,6 +445,13 @@ service App {
 		};
 	};
 
+	rpc AdminAddMoneyThree(AdminDailyAddMoneyTwoRequest) returns (AdminDailyAddMoneyTwoReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/add_money_three"
+			body: "send_body"
+		};
+	};
+
 	rpc AdminSetIspay(AdminSetIspayRequest) returns (AdminSetIspayReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/set_ispay"
