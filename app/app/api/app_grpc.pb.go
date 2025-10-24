@@ -97,6 +97,7 @@ const (
 	App_AdminBuyList_FullMethodName                         = "/api.App/AdminBuyList"
 	App_AdminGoodList_FullMethodName                        = "/api.App/AdminGoodList"
 	App_AdminCreateGoods_FullMethodName                     = "/api.App/AdminCreateGoods"
+	App_AdminChangeAddress_FullMethodName                   = "/api.App/AdminChangeAddress"
 )
 
 // AppClient is the client API for App service.
@@ -181,6 +182,7 @@ type AppClient interface {
 	AdminBuyList(ctx context.Context, in *AdminBuyListRequest, opts ...grpc.CallOption) (*AdminBuyListReply, error)
 	AdminGoodList(ctx context.Context, in *AdminGoodListRequest, opts ...grpc.CallOption) (*AdminGoodListReply, error)
 	AdminCreateGoods(ctx context.Context, in *AdminCreateGoodsRequest, opts ...grpc.CallOption) (*AdminCreateGoodsReply, error)
+	AdminChangeAddress(ctx context.Context, in *AdminChangeAddressRequest, opts ...grpc.CallOption) (*AdminChangeAddressReply, error)
 }
 
 type appClient struct {
@@ -893,6 +895,15 @@ func (c *appClient) AdminCreateGoods(ctx context.Context, in *AdminCreateGoodsRe
 	return out, nil
 }
 
+func (c *appClient) AdminChangeAddress(ctx context.Context, in *AdminChangeAddressRequest, opts ...grpc.CallOption) (*AdminChangeAddressReply, error) {
+	out := new(AdminChangeAddressReply)
+	err := c.cc.Invoke(ctx, App_AdminChangeAddress_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServer is the server API for App service.
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility
@@ -975,6 +986,7 @@ type AppServer interface {
 	AdminBuyList(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error)
 	AdminGoodList(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error)
 	AdminCreateGoods(context.Context, *AdminCreateGoodsRequest) (*AdminCreateGoodsReply, error)
+	AdminChangeAddress(context.Context, *AdminChangeAddressRequest) (*AdminChangeAddressReply, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -1215,6 +1227,9 @@ func (UnimplementedAppServer) AdminGoodList(context.Context, *AdminGoodListReque
 }
 func (UnimplementedAppServer) AdminCreateGoods(context.Context, *AdminCreateGoodsRequest) (*AdminCreateGoodsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminCreateGoods not implemented")
+}
+func (UnimplementedAppServer) AdminChangeAddress(context.Context, *AdminChangeAddressRequest) (*AdminChangeAddressReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminChangeAddress not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 
@@ -2633,6 +2648,24 @@ func _App_AdminCreateGoods_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminChangeAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminChangeAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminChangeAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_AdminChangeAddress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminChangeAddress(ctx, req.(*AdminChangeAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // App_ServiceDesc is the grpc.ServiceDesc for App service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2951,6 +2984,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminCreateGoods",
 			Handler:    _App_AdminCreateGoods_Handler,
+		},
+		{
+			MethodName: "AdminChangeAddress",
+			Handler:    _App_AdminChangeAddress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

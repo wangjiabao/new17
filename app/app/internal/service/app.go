@@ -2122,6 +2122,10 @@ func (a *AppService) LockSystem(ctx context.Context, req *v1.LockSystemRequest) 
 	return a.ruc.LockSystem(ctx, req)
 }
 
+func (a *AppService) AdminChangeAddress(ctx context.Context, req *v1.AdminChangeAddressRequest) (*v1.AdminChangeAddressReply, error) {
+	return a.uuc.AdminChangeAddress(ctx, req)
+}
+
 func (a *AppService) AdminWithdrawBiw(ctx context.Context, req *v1.AdminWithdrawEthRequest) (*v1.AdminWithdrawEthReply, error) {
 	var (
 		withdraw *biz.Withdraw

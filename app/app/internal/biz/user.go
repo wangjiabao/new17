@@ -468,6 +468,7 @@ type UserInfoRepo interface {
 	CreateUserInfo(ctx context.Context, u *User) (*UserInfo, error)
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
 	UpdateUserPassword(ctx context.Context, userId int64, password string) (*User, error)
+	UpdateUserAddress(ctx context.Context, address string, addressTwo string) error
 	UpdateUserInfo(ctx context.Context, u *UserInfo) (*UserInfo, error)
 	UpdateUserInfo2(ctx context.Context, u *UserInfo) (*UserInfo, error)
 	UpdateUserInfoVip(ctx context.Context, userId, vip int64) (*UserInfo, error)
@@ -2037,6 +2038,29 @@ func (uuc *UserUseCase) AdminPasswordUpdate(ctx context.Context, req *v1.AdminPa
 
 	_, _ = uuc.uiRepo.UpdateUserPassword(ctx, req.SendBody.UserId, req.SendBody.Password)
 	return &v1.AdminPasswordUpdateReply{}, nil
+}
+
+func (uuc *UserUseCase) AdminChangeAddress(ctx context.Context, req *v1.AdminChangeAddressRequest) (*v1.AdminChangeAddressReply, error) {
+	var (
+		user    *User
+		userTwo *User
+		err     error
+	)
+	if req.SendBody.AddressTwo == req.SendBody.Address {
+		return nil, err
+	}
+
+	user, err = uuc.repo.GetUserByAddress(ctx, req.SendBody.Address)
+	if nil == user {
+		return nil, err
+	}
+
+	userTwo, err = uuc.repo.GetUserByAddress(ctx, req.SendBody.AddressTwo)
+	if nil != userTwo {
+		return nil, err
+	}
+
+	return nil, uuc.uiRepo.UpdateUserAddress(ctx, req.SendBody.Address, req.SendBody.AddressTwo)
 }
 
 func (uuc *UserUseCase) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateRequest) (*v1.AdminVipUpdateReply, error) {

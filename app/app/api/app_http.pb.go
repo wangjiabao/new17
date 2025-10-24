@@ -27,6 +27,7 @@ const OperationAppAdminAmountFourUpdate = "/api.App/AdminAmountFourUpdate"
 const OperationAppAdminAreaLevelUpdate = "/api.App/AdminAreaLevelUpdate"
 const OperationAppAdminBalanceUpdate = "/api.App/AdminBalanceUpdate"
 const OperationAppAdminBuyList = "/api.App/AdminBuyList"
+const OperationAppAdminChangeAddress = "/api.App/AdminChangeAddress"
 const OperationAppAdminChangePassword = "/api.App/AdminChangePassword"
 const OperationAppAdminConfig = "/api.App/AdminConfig"
 const OperationAppAdminConfigUpdate = "/api.App/AdminConfigUpdate"
@@ -107,6 +108,7 @@ type AppHTTPServer interface {
 	AdminAreaLevelUpdate(context.Context, *AdminAreaLevelUpdateRequest) (*AdminAreaLevelUpdateReply, error)
 	AdminBalanceUpdate(context.Context, *AdminBalanceUpdateRequest) (*AdminBalanceUpdateReply, error)
 	AdminBuyList(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error)
+	AdminChangeAddress(context.Context, *AdminChangeAddressRequest) (*AdminChangeAddressReply, error)
 	AdminChangePassword(context.Context, *AdminChangePasswordRequest) (*AdminChangePasswordReply, error)
 	AdminConfig(context.Context, *AdminConfigRequest) (*AdminConfigReply, error)
 	AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error)
@@ -259,6 +261,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/buy_list", _App_AdminBuyList0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/good_list", _App_AdminGoodList0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/update_goods", _App_AdminCreateGoods0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/change_address", _App_AdminChangeAddress0_HTTP_Handler(srv))
 }
 
 func _App_UserInfo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
@@ -1815,6 +1818,28 @@ func _App_AdminCreateGoods0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _App_AdminChangeAddress0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminChangeAddressRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminChangeAddress)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminChangeAddress(ctx, req.(*AdminChangeAddressRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminChangeAddressReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type AppHTTPClient interface {
 	AdminAddMoney(ctx context.Context, req *AdminDailyAddMoneyRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyReply, err error)
 	AdminAddMoneyThree(ctx context.Context, req *AdminDailyAddMoneyTwoRequest, opts ...http.CallOption) (rsp *AdminDailyAddMoneyTwoReply, err error)
@@ -1824,6 +1849,7 @@ type AppHTTPClient interface {
 	AdminAreaLevelUpdate(ctx context.Context, req *AdminAreaLevelUpdateRequest, opts ...http.CallOption) (rsp *AdminAreaLevelUpdateReply, err error)
 	AdminBalanceUpdate(ctx context.Context, req *AdminBalanceUpdateRequest, opts ...http.CallOption) (rsp *AdminBalanceUpdateReply, err error)
 	AdminBuyList(ctx context.Context, req *AdminBuyListRequest, opts ...http.CallOption) (rsp *AdminBuyListReply, err error)
+	AdminChangeAddress(ctx context.Context, req *AdminChangeAddressRequest, opts ...http.CallOption) (rsp *AdminChangeAddressReply, err error)
 	AdminChangePassword(ctx context.Context, req *AdminChangePasswordRequest, opts ...http.CallOption) (rsp *AdminChangePasswordReply, err error)
 	AdminConfig(ctx context.Context, req *AdminConfigRequest, opts ...http.CallOption) (rsp *AdminConfigReply, err error)
 	AdminConfigUpdate(ctx context.Context, req *AdminConfigUpdateRequest, opts ...http.CallOption) (rsp *AdminConfigUpdateReply, err error)
@@ -2002,6 +2028,19 @@ func (c *AppHTTPClientImpl) AdminBuyList(ctx context.Context, in *AdminBuyListRe
 	opts = append(opts, http.Operation(OperationAppAdminBuyList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminChangeAddress(ctx context.Context, in *AdminChangeAddressRequest, opts ...http.CallOption) (*AdminChangeAddressReply, error) {
+	var out AdminChangeAddressReply
+	pattern := "/api/admin_dhb/change_address"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAppAdminChangeAddress))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

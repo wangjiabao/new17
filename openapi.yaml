@@ -303,6 +303,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/change_address:
+        post:
+            tags:
+                - App
+            operationId: App_AdminChangeAddress
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminChangeAddressRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminChangeAddressReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/change_password:
         post:
             tags:
@@ -1842,6 +1866,16 @@ components:
                 three:
                     type: string
                 four:
+                    type: string
+        AdminChangeAddressReply:
+            type: object
+            properties: {}
+        AdminChangeAddressRequest_SendBody:
+            type: object
+            properties:
+                address:
+                    type: string
+                addressTwo:
                     type: string
         AdminChangePasswordReply:
             type: object

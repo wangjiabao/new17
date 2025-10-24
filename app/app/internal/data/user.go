@@ -1127,6 +1127,17 @@ func (ui *UserInfoRepo) UpdateUserPassword(ctx context.Context, userId int64, pa
 	return nil, nil
 }
 
+// UpdateUserAddress .
+func (ui *UserInfoRepo) UpdateUserAddress(ctx context.Context, address string, addressTwo string) error {
+	res := ui.data.DB(ctx).Table("user").Where("address=?", address).Updates(
+		map[string]interface{}{"address": addressTwo})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_INFO_ERROR", "用户信息修改失败")
+	}
+
+	return nil
+}
+
 // UpdateUserInfo .
 func (ui *UserInfoRepo) UpdateUserInfo(ctx context.Context, u *biz.UserInfo) (*biz.UserInfo, error) {
 	var userInfo UserInfo

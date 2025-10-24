@@ -509,6 +509,13 @@ service App {
 			body: "send_body"
 		};
 	};
+
+	rpc AdminChangeAddress (AdminChangeAddressRequest) returns (AdminChangeAddressReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/change_address"
+			body: "send_body"
+		};
+	};
 }
 
 message AdminCreateGoodsRequest {
@@ -520,6 +527,17 @@ message AdminCreateGoodsRequest {
 }
 
 message AdminCreateGoodsReply {
+}
+
+message AdminChangeAddressRequest {
+	message SendBody {
+		string address = 2;
+		string addressTwo = 1;
+	}
+	SendBody send_body = 1;
+}
+
+message AdminChangeAddressReply {
 }
 
 message AdminSetIspayRequest {
