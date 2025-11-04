@@ -4263,16 +4263,16 @@ func (ui *UserInfoRepo) UpdateUserUsdtFloat(ctx context.Context, userId int64, a
 		return errors.NotFound("user balance err", "user balance not found")
 	}
 
-	var reward Reward
-	reward.UserId = userId
-	reward.AmountNew = amount
-	reward.AmountNewTwo = last
-	reward.Type = "system_reward_area_two_daily" // 本次分红的行为类型
-	reward.Reason = "deposit_three"
-	err := ui.data.DB(ctx).Table("reward").Create(&reward).Error
-	if err != nil {
-		return err
-	}
+	//var reward Reward
+	//reward.UserId = userId
+	//reward.AmountNew = amount
+	//reward.AmountNewTwo = last
+	//reward.Type = "system_reward_area_two_daily" // 本次分红的行为类型
+	//reward.Reason = "deposit_three"
+	//err := ui.data.DB(ctx).Table("reward").Create(&reward).Error
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }

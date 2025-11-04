@@ -9477,6 +9477,33 @@ func (uuc *UserUseCase) AdminAddMoney(ctx context.Context, req *v1.AdminDailyAdd
 	return nil, nil
 }
 
+// AdminAddMoneyTwo  .
+func (uuc *UserUseCase) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
+	var (
+		user *User
+		err  error
+	)
+	user, err = uuc.repo.GetUserByAddressTwo(ctx, req.SendBody.Address)
+	if nil != err {
+		return nil, nil
+	}
+
+	if nil != user && 0 < user.ID {
+		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { //
+			err = uuc.uiRepo.UpdateUserUsdtFloat(ctx, user.ID, float64(req.SendBody.Usdt), 0, "USDT")
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); nil != err {
+			return nil, err
+		}
+	}
+
+	return nil, nil
+}
+
 // AdminSubMoney  .
 func (uuc *UserUseCase) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoneyRequest) (*v1.AdminSubMoneyReply, error) {
 	var (

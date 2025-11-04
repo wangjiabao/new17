@@ -1074,35 +1074,36 @@ func (a *AppService) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoneyReq
 // AdminAddMoneyTwo  .
 func (a *AppService) AdminAddMoneyTwo(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
 
-	var (
-		user *biz.User
-		err  error
-	)
+	return a.uuc.AdminAddMoneyTwo(ctx, req)
+	// 	var (
+	// 		user *biz.User
+	// 		err  error
+	// 	)
 
-	user, err = a.uuc.GetUserByAddressTwo(ctx, req.SendBody.Address)
-	if nil != err || nil == user {
-		return nil, err
-	}
+	// 	user, err = a.uuc.GetUserByAddressTwo(ctx, req.SendBody.Address)
+	// 	if nil != err || nil == user {
+	// 		return nil, err
+	// 	}
 
-	if user.Address != req.SendBody.Address {
-		return nil, nil
-	}
+	// 	if user.Address != req.SendBody.Address {
+	// 		return nil, nil
+	// 	}
 
-	// 充值
-	err = a.ruc.DepositNew(ctx, user.ID, 0, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
-		UserId:    user.ID,
-		Status:    "success",
-		Type:      "deposit",
-		RelAmount: req.SendBody.Usdt,
-		Amount:    strconv.FormatInt(req.SendBody.Usdt, 10) + "00000000000000000000",
-		CoinType:  "USDT",
-		Last:      99999,
-	}, true)
-	if nil != err {
-		fmt.Println(err)
-	}
+	// 	// 充值
+	// 	err = a.ruc.DepositNew(ctx, user.ID, 0, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
+	// 		UserId:    user.ID,
+	// 		Status:    "success",
+	// 		Type:      "deposit",
+	// 		RelAmount: req.SendBody.Usdt,
+	// 		Amount:    strconv.FormatInt(req.SendBody.Usdt, 10) + "00000000000000000000",
+	// 		CoinType:  "USDT",
+	// 		Last:      99999,
+	// 	}, true)
+	// 	if nil != err {
+	// 		fmt.Println(err)
+	// 	}
 
-	return nil, nil
+	// 	return nil, nil
 }
 
 // AdminRecommendLevelUpdate  .
