@@ -4424,7 +4424,7 @@ func (uuc *UserUseCase) AdminMyTotalAmount(ctx context.Context, req *v1.AdminDai
 			}
 
 			if 4544 == tmpUserId {
-				fmt.Println(tmpUserId, v.Amount, "下级", tmpRecommendUserIds[i-1], "根", v.UserId, "代", totalTmp-i)
+				fmt.Println(tmpUserId, v.Amount, "下级", tmpRecommendUserIds[i+1], "根", v.UserId, "代", totalTmp-i)
 			}
 
 			userTotalAmount[tmpUserId] += v.Amount
