@@ -50,6 +50,7 @@ type User struct {
 	FiveNew                string    `gorm:"type:varchar(200)"`
 	SixNew                 string    `gorm:"type:varchar(200)"`
 	SevenNew               string    `gorm:"type:varchar(200)"`
+	AmountSelf             uint64    `gorm:"type:bigint;not null"`
 }
 
 type Stake struct {
@@ -683,6 +684,7 @@ func (u *UserRepo) GetUserByUserIdsTwo(ctx context.Context, userIds []int64) (ma
 			AmountRecommendUsdtGet: item.AmountRecommendUsdtGet,
 			MyTotalAmount:          item.MyTotalAmount,
 			Vip:                    item.Vip,
+			AmountSelf:             item.AmountSelf,
 		}
 	}
 	return res, nil
@@ -871,6 +873,7 @@ func (u *UserRepo) GetAllUsers(ctx context.Context) ([]*biz.User, error) {
 			RecommendUserH:         item.RecommendUserH,
 			AmountFourGet:          item.AmountFourGet,
 			AmountFour:             item.AmountFour,
+			AmountSelf:             item.AmountSelf,
 		})
 	}
 	return res, nil

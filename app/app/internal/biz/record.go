@@ -470,8 +470,8 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId, pId int64, amo
 		tmpAreaMin := uint64(0)
 		for _, vV := range myLowUser[tmpUserId] {
 			if _, ok2 := usersMap[vV.UserId]; ok2 {
-				if tmpMax < uint64(usersMap[vV.UserId].MyTotalAmount)+usersMap[vV.UserId].Amount {
-					tmpMax = uint64(usersMap[vV.UserId].MyTotalAmount) + usersMap[vV.UserId].Amount
+				if tmpMax < uint64(usersMap[vV.UserId].MyTotalAmount)+usersMap[vV.UserId].AmountSelf {
+					tmpMax = uint64(usersMap[vV.UserId].MyTotalAmount) + usersMap[vV.UserId].AmountSelf
 				}
 			}
 		}

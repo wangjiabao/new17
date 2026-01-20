@@ -59,6 +59,7 @@ type User struct {
 	Five                   string
 	Six                    string
 	Seven                  string
+	AmountSelf             uint64
 }
 
 type Stake struct {
@@ -855,21 +856,28 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		tmpMyRecommendUserIdsLen := int64(0)
 		tmpMax := uint64(0)
 		tmpAreaMin := uint64(0)
-
+		tmpMaxId := int64(0)
 		if _, ok := myLowUser[vUsers.ID]; ok {
 			tmpMyRecommendUserIdsLen = int64(len(myLowUser[vUsers.ID]))
 
 			for _, vV := range myLowUser[vUsers.ID] {
 				if _, ok2 := usersMap[vV.UserId]; ok2 {
-					if tmpMax < uint64(usersMap[vV.UserId].MyTotalAmount)+usersMap[vV.UserId].Amount {
-						tmpMax = uint64(usersMap[vV.UserId].MyTotalAmount) + usersMap[vV.UserId].Amount
+					if tmpMax < uint64(usersMap[vV.UserId].MyTotalAmount)+usersMap[vV.UserId].AmountSelf {
+						tmpMax = uint64(usersMap[vV.UserId].MyTotalAmount) + usersMap[vV.UserId].AmountSelf
+						tmpMaxId = vV.ID
 					}
 				}
 			}
 
-			if 0 < tmpMax {
-				if uint64(vUsers.MyTotalAmount) > tmpMax {
-					tmpAreaMin = uint64(vUsers.MyTotalAmount) - tmpMax
+			if 0 < tmpMaxId {
+				for _, vMyLowUser := range myLowUser[vUsers.ID] {
+					if _, ok2 := usersMap[vMyLowUser.UserId]; !ok2 {
+						continue
+					}
+
+					if tmpMaxId != vMyLowUser.ID {
+						tmpAreaMin += uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].AmountSelf
+					}
 				}
 			}
 		}
@@ -4310,8 +4318,8 @@ func (uuc *UserUseCase) updateVip(ctx context.Context, tmpUserId int64, userIdsL
 			vip1++
 		}
 
-		if tmpAreaMax < vMyLowUser.MyTotalAmount+vMyLowUser.AmountUsdt {
-			tmpAreaMax = vMyLowUser.MyTotalAmount + vMyLowUser.AmountUsdt
+		if tmpAreaMax < vMyLowUser.MyTotalAmount+float64(vMyLowUser.AmountSelf) {
+			tmpAreaMax = vMyLowUser.MyTotalAmount + float64(vMyLowUser.AmountSelf)
 			tmpMaxId = vMyLowUser.ID
 		}
 	}
@@ -4319,7 +4327,7 @@ func (uuc *UserUseCase) updateVip(ctx context.Context, tmpUserId int64, userIdsL
 	if 0 < tmpMaxId {
 		for _, vMyLowUser := range tmpLowUsers {
 			if tmpMaxId != vMyLowUser.ID {
-				tmpAreaMin += vMyLowUser.MyTotalAmount + vMyLowUser.AmountUsdt
+				tmpAreaMin += vMyLowUser.MyTotalAmount + float64(vMyLowUser.AmountSelf)
 			}
 		}
 	}
@@ -4670,8 +4678,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				continue
 			}
 
-			if tmpAreaMax < uint64(usersMap[vMyLowUser.UserId].MyTotalAmount)+usersMap[vMyLowUser.UserId].Amount {
-				tmpAreaMax = uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].Amount
+			if tmpAreaMax < uint64(usersMap[vMyLowUser.UserId].MyTotalAmount)+usersMap[vMyLowUser.UserId].AmountSelf {
+				tmpAreaMax = uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].AmountSelf
 				tmpMaxId = vMyLowUser.ID
 			}
 		}
@@ -4686,7 +4694,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			}
 
 			if tmpMaxId != vMyLowUser.ID {
-				tmpAreaMin += uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].Amount
+				tmpAreaMin += uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].AmountSelf
 			}
 		}
 
@@ -4965,8 +4973,8 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
-				if tmpAreaMax < uint64(usersMap[vMyLowUser.UserId].MyTotalAmount)+usersMap[vMyLowUser.UserId].Amount {
-					tmpAreaMax = uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].Amount
+				if tmpAreaMax < uint64(usersMap[vMyLowUser.UserId].MyTotalAmount)+usersMap[vMyLowUser.UserId].AmountSelf {
+					tmpAreaMax = uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].AmountSelf
 					tmpMaxId = vMyLowUser.ID
 					tmpMaxUserId = vMyLowUser.UserId
 				}
@@ -5015,7 +5023,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				}
 
 				if tmpMaxId != vMyLowUser.ID {
-					tmpAreaMin += uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].Amount
+					tmpAreaMin += uint64(usersMap[vMyLowUser.UserId].MyTotalAmount) + usersMap[vMyLowUser.UserId].AmountSelf
 				}
 			}
 
