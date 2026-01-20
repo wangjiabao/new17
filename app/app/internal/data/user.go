@@ -2950,6 +2950,17 @@ func (ui *UserInfoRepo) UpdateUserMyTotalAmount(ctx context.Context, userId int6
 	return nil
 }
 
+// UpdateUserAmountSelf .
+func (ui *UserInfoRepo) UpdateUserAmountSelf(ctx context.Context, userId int64, amountUsdt uint64) error {
+	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
+		Updates(map[string]interface{}{"amount_self": gorm.Expr("amount_self + ?", amountUsdt)})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+	}
+
+	return nil
+}
+
 // UpdateUserMyTotalAmountSub .
 func (ui *UserInfoRepo) UpdateUserMyTotalAmountSub(ctx context.Context, userId int64, amountUsdt float64) error {
 	return nil

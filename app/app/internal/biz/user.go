@@ -454,6 +454,7 @@ type UserInfoRepo interface {
 	UpdateUserRewardAreaTwo(ctx context.Context, userId int64, amountUsdt float64, stop bool) (int64, error)
 	UpdateUserRewardRecommendUserGet(ctx context.Context, userId int64, amountUsdt float64, enough bool, amount float64) error
 	UpdateUserMyTotalAmount(ctx context.Context, userId int64, amountUsdt float64) error
+	UpdateUserAmountSelf(ctx context.Context, userId int64, amountUsdt uint64) error
 	UpdateUserMyTotalAmountAdd(ctx context.Context, userId int64, amountUsdt, myTotal float64) error
 	UpdateUserMyTotalAmountSub(ctx context.Context, userId int64, amountUsdt float64) error
 	GetBuyRecord(ctx context.Context, day int) ([]*BuyRecord, error)
@@ -4373,69 +4374,71 @@ func (uuc *UserUseCase) AdminMyTotalAmount(ctx context.Context, req *v1.AdminDai
 		return nil, nil
 	}
 
-	fmt.Println("总计", len(allRecord), "条")
-	var (
-		users    []*User
-		usersMap map[int64]*User
-	)
-	users, err = uuc.ubRepo.GetAllUsersB(ctx)
-	if nil == users {
-		return nil, nil
-	}
+	//fmt.Println("总计", len(allRecord), "条")
+	//var (
+	//	users    []*User
+	//	usersMap map[int64]*User
+	//)
+	//users, err = uuc.ubRepo.GetAllUsersB(ctx)
+	//if nil == users {
+	//	return nil, nil
+	//}
+	//
+	//usersMap = make(map[int64]*User, 0)
+	//for _, vUsers := range users {
+	//	usersMap[vUsers.ID] = vUsers
+	//}
 
-	usersMap = make(map[int64]*User, 0)
-	for _, vUsers := range users {
-		usersMap[vUsers.ID] = vUsers
-	}
-
-	var (
-		userRecommends    []*UserRecommend
-		userRecommendsMap map[int64]*UserRecommend
-	)
-	userRecommends, err = uuc.urRepo.GetUserRecommends(ctx)
-	if nil != err {
-		return nil, nil
-	}
-
-	userRecommendsMap = make(map[int64]*UserRecommend, 0)
-	for _, vUr := range userRecommends {
-		userRecommendsMap[vUr.UserId] = vUr
-	}
-
-	userTotalAmount := make(map[int64]float64, 0)
-	tmpAmount := float64(0)
+	//var (
+	//	userRecommends    []*UserRecommend
+	//	userRecommendsMap map[int64]*UserRecommend
+	//)
+	//userRecommends, err = uuc.urRepo.GetUserRecommends(ctx)
+	//if nil != err {
+	//	return nil, nil
+	//}
+	//
+	//userRecommendsMap = make(map[int64]*UserRecommend, 0)
+	//for _, vUr := range userRecommends {
+	//	userRecommendsMap[vUr.UserId] = vUr
+	//}
+	//
+	//userTotalAmount := make(map[int64]float64, 0)
+	//tmpAmount := float64(0)
 	for _, v := range allRecord {
-		tmpAmount += v.Amount
-		if _, ok := userRecommendsMap[v.UserId]; !ok {
-			continue
+
+		err = uuc.uiRepo.UpdateUserAmountSelf(ctx, v.UserId, uint64(v.Amount))
+		if nil != err {
+			fmt.Println(err)
 		}
+		//tmpAmount += v.Amount
+		//if _, ok := userRecommendsMap[v.UserId]; !ok {
+		//	continue
+		//}
+		//
+		//tmpRecommendUserIds := make([]string, 0)
+		//userRecommend := userRecommendsMap[v.UserId]
+		//if "" != userRecommend.RecommendCode {
+		//	tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		//}
+		//
+		//totalTmp := len(tmpRecommendUserIds) - 1
+		//for i := totalTmp; i >= 0; i-- {
+		//	tmpUserId, _ := strconv.ParseInt(tmpRecommendUserIds[i], 10, 64) // 最后一位是直推人
+		//	if 0 >= tmpUserId {
+		//		continue
+		//	}
+		//
+		//	userTotalAmount[tmpUserId] += v.Amount
+		//}
 
-		tmpRecommendUserIds := make([]string, 0)
-		userRecommend := userRecommendsMap[v.UserId]
-		if "" != userRecommend.RecommendCode {
-			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
-		}
-
-		totalTmp := len(tmpRecommendUserIds) - 1
-		for i := totalTmp; i >= 0; i-- {
-			tmpUserId, _ := strconv.ParseInt(tmpRecommendUserIds[i], 10, 64) // 最后一位是直推人
-			if 0 >= tmpUserId {
-				continue
-			}
-
-			if 4544 == tmpUserId {
-				fmt.Println(tmpUserId, v.Amount, "下级", tmpRecommendUserIds[i+1], "根", v.UserId, "代", totalTmp-i)
-			}
-
-			userTotalAmount[tmpUserId] += v.Amount
-		}
 	}
 
-	fmt.Println("总计", tmpAmount, "usdt")
-
-	for k, v := range userTotalAmount {
-		fmt.Println("用户", k, v)
-	}
+	//fmt.Println("总计", tmpAmount, "usdt")
+	//
+	//for k, v := range userTotalAmount {
+	//	fmt.Println("用户", k, v)
+	//}
 
 	return nil, nil
 }
