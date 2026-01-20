@@ -254,6 +254,12 @@ service App {
 		};
 	};
 
+	rpc AdminMyTotalAmount (AdminDailyRewardRequest) returns (AdminDailyRewardReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/check_my_total_amount"
+		};
+	};
+
 	rpc AdminConfigUpdate (AdminConfigUpdateRequest) returns (AdminConfigUpdateReply) {
 		option (google.api.http) = {
 			post: "/api/admin_dhb/config_update"

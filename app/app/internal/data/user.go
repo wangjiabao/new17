@@ -3382,6 +3382,35 @@ func (ui *UserInfoRepo) UpdateUserRewardAllNew(ctx context.Context, id, userId i
 	return nil
 }
 
+// GetAllBuyRecord .
+func (ui *UserInfoRepo) GetAllBuyRecord(ctx context.Context) ([]*biz.BuyRecord, error) {
+	res := make([]*biz.BuyRecord, 0)
+
+	var buyRecord []*BuyRecord
+	if err := ui.data.db.Table("buy_record").Find(&buyRecord).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "buy_record ERROR", err.Error())
+	}
+
+	for _, v := range buyRecord {
+		res = append(res, &biz.BuyRecord{
+			ID:          v.ID,
+			UserId:      v.UserId,
+			Status:      v.Status,
+			Amount:      v.Amount,
+			AmountGet:   v.AmountGet,
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+			LastUpdated: v.LastUpdated,
+		})
+	}
+
+	return res, nil
+}
+
 // GetBuyRecord .
 func (ui *UserInfoRepo) GetBuyRecord(ctx context.Context, day int) ([]*biz.BuyRecord, error) {
 	res := make([]*biz.BuyRecord, 0)

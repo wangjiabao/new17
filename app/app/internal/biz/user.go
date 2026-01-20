@@ -442,6 +442,7 @@ type UserCurrentMonthRecommendRepo interface {
 
 type UserInfoRepo interface {
 	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
+	GetAllBuyRecord(ctx context.Context) ([]*BuyRecord, error)
 	UpdateUserRewardStakeReomve(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardStake(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardNew(ctx context.Context, id, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool) (int64, error)
@@ -4359,6 +4360,80 @@ func (uuc *UserUseCase) updateVip(ctx context.Context, tmpUserId int64, userIdsL
 	}
 
 	return
+}
+
+func (uuc *UserUseCase) AdminMyTotalAmount(ctx context.Context, req *v1.AdminDailyRewardRequest) (*v1.AdminDailyRewardReply, error) {
+
+	var (
+		allRecord []*BuyRecord
+		err       error
+	)
+	allRecord, err = uuc.uiRepo.GetAllBuyRecord(ctx)
+	if nil != err {
+		return nil, nil
+	}
+
+	fmt.Println("总计", len(allRecord), "条")
+	var (
+		users    []*User
+		usersMap map[int64]*User
+	)
+	users, err = uuc.ubRepo.GetAllUsersB(ctx)
+	if nil == users {
+		return nil, nil
+	}
+
+	usersMap = make(map[int64]*User, 0)
+	for _, vUsers := range users {
+		usersMap[vUsers.ID] = vUsers
+	}
+
+	var (
+		userRecommends    []*UserRecommend
+		userRecommendsMap map[int64]*UserRecommend
+	)
+	userRecommends, err = uuc.urRepo.GetUserRecommends(ctx)
+	if nil != err {
+		return nil, nil
+	}
+
+	userRecommendsMap = make(map[int64]*UserRecommend, 0)
+	for _, vUr := range userRecommends {
+		userRecommendsMap[vUr.UserId] = vUr
+	}
+
+	userTotalAmount := make(map[int64]float64, 0)
+	tmpAmount := float64(0)
+	for _, v := range allRecord {
+		tmpAmount += v.Amount
+		if _, ok := userRecommendsMap[v.UserId]; !ok {
+			continue
+		}
+
+		tmpRecommendUserIds := make([]string, 0)
+		userRecommend := userRecommendsMap[v.UserId]
+		if "" != userRecommend.RecommendCode {
+			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		}
+
+		totalTmp := len(tmpRecommendUserIds) - 1
+		for i := totalTmp; i >= 0; i-- {
+			tmpUserId, _ := strconv.ParseInt(tmpRecommendUserIds[i], 10, 64) // 最后一位是直推人
+			if 0 >= tmpUserId {
+				continue
+			}
+
+			userTotalAmount[tmpUserId] += v.Amount
+		}
+	}
+
+	fmt.Println("总计", tmpAmount, "usdt")
+
+	for k, v := range userTotalAmount {
+		fmt.Println("用户", k, v)
+	}
+
+	return nil, nil
 }
 
 func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDailyRewardRequest) (*v1.AdminDailyRewardReply, error) {

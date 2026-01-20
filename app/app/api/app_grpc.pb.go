@@ -58,6 +58,7 @@ const (
 	App_AdminMonthRecommend_FullMethodName                  = "/api.App/AdminMonthRecommend"
 	App_AdminConfig_FullMethodName                          = "/api.App/AdminConfig"
 	App_AdminDailyReward_FullMethodName                     = "/api.App/AdminDailyReward"
+	App_AdminMyTotalAmount_FullMethodName                   = "/api.App/AdminMyTotalAmount"
 	App_AdminConfigUpdate_FullMethodName                    = "/api.App/AdminConfigUpdate"
 	App_AdminConfigUpdateListen_FullMethodName              = "/api.App/AdminConfigUpdateListen"
 	App_AdminUserPasswordUpdate_FullMethodName              = "/api.App/AdminUserPasswordUpdate"
@@ -143,6 +144,7 @@ type AppClient interface {
 	AdminMonthRecommend(ctx context.Context, in *AdminMonthRecommendRequest, opts ...grpc.CallOption) (*AdminMonthRecommendReply, error)
 	AdminConfig(ctx context.Context, in *AdminConfigRequest, opts ...grpc.CallOption) (*AdminConfigReply, error)
 	AdminDailyReward(ctx context.Context, in *AdminDailyRewardRequest, opts ...grpc.CallOption) (*AdminDailyRewardReply, error)
+	AdminMyTotalAmount(ctx context.Context, in *AdminDailyRewardRequest, opts ...grpc.CallOption) (*AdminDailyRewardReply, error)
 	AdminConfigUpdate(ctx context.Context, in *AdminConfigUpdateRequest, opts ...grpc.CallOption) (*AdminConfigUpdateReply, error)
 	AdminConfigUpdateListen(ctx context.Context, in *AdminConfigUpdateListenRequest, opts ...grpc.CallOption) (*AdminConfigUpdateListenReply, error)
 	AdminUserPasswordUpdate(ctx context.Context, in *AdminPasswordUpdateRequest, opts ...grpc.CallOption) (*AdminPasswordUpdateReply, error)
@@ -538,6 +540,15 @@ func (c *appClient) AdminConfig(ctx context.Context, in *AdminConfigRequest, opt
 func (c *appClient) AdminDailyReward(ctx context.Context, in *AdminDailyRewardRequest, opts ...grpc.CallOption) (*AdminDailyRewardReply, error) {
 	out := new(AdminDailyRewardReply)
 	err := c.cc.Invoke(ctx, App_AdminDailyReward_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminMyTotalAmount(ctx context.Context, in *AdminDailyRewardRequest, opts ...grpc.CallOption) (*AdminDailyRewardReply, error) {
+	out := new(AdminDailyRewardReply)
+	err := c.cc.Invoke(ctx, App_AdminMyTotalAmount_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -947,6 +958,7 @@ type AppServer interface {
 	AdminMonthRecommend(context.Context, *AdminMonthRecommendRequest) (*AdminMonthRecommendReply, error)
 	AdminConfig(context.Context, *AdminConfigRequest) (*AdminConfigReply, error)
 	AdminDailyReward(context.Context, *AdminDailyRewardRequest) (*AdminDailyRewardReply, error)
+	AdminMyTotalAmount(context.Context, *AdminDailyRewardRequest) (*AdminDailyRewardReply, error)
 	AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error)
 	AdminConfigUpdateListen(context.Context, *AdminConfigUpdateListenRequest) (*AdminConfigUpdateListenReply, error)
 	AdminUserPasswordUpdate(context.Context, *AdminPasswordUpdateRequest) (*AdminPasswordUpdateReply, error)
@@ -1110,6 +1122,9 @@ func (UnimplementedAppServer) AdminConfig(context.Context, *AdminConfigRequest) 
 }
 func (UnimplementedAppServer) AdminDailyReward(context.Context, *AdminDailyRewardRequest) (*AdminDailyRewardReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyReward not implemented")
+}
+func (UnimplementedAppServer) AdminMyTotalAmount(context.Context, *AdminDailyRewardRequest) (*AdminDailyRewardReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminMyTotalAmount not implemented")
 }
 func (UnimplementedAppServer) AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminConfigUpdate not implemented")
@@ -1942,6 +1957,24 @@ func _App_AdminDailyReward_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminDailyReward(ctx, req.(*AdminDailyRewardRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminMyTotalAmount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminDailyRewardRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminMyTotalAmount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_AdminMyTotalAmount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminMyTotalAmount(ctx, req.(*AdminDailyRewardRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2828,6 +2861,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminDailyReward",
 			Handler:    _App_AdminDailyReward_Handler,
+		},
+		{
+			MethodName: "AdminMyTotalAmount",
+			Handler:    _App_AdminMyTotalAmount_Handler,
 		},
 		{
 			MethodName: "AdminConfigUpdate",
