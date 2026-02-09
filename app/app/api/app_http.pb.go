@@ -85,6 +85,7 @@ const OperationAppDeposit5 = "/api.App/Deposit5"
 const OperationAppDepositBiw = "/api.App/DepositBiw"
 const OperationAppDepositWithdraw = "/api.App/DepositWithdraw"
 const OperationAppDepositWithdrawBiw = "/api.App/DepositWithdrawBiw"
+const OperationAppDownloadData = "/api.App/DownloadData"
 const OperationAppFeeRewardList = "/api.App/FeeRewardList"
 const OperationAppLockSystem = "/api.App/LockSystem"
 const OperationAppLockUser = "/api.App/LockUser"
@@ -167,6 +168,7 @@ type AppHTTPServer interface {
 	DepositBiw(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositWithdraw(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositWithdrawBiw(context.Context, *DepositRequest) (*DepositReply, error)
+	DownloadData(context.Context, *DownloadDataRequest) (*DownloadDataReply, error)
 	FeeRewardList(context.Context, *FeeRewardListRequest) (*FeeRewardListReply, error)
 	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
 	LockUser(context.Context, *LockUserRequest) (*LockUserReply, error)
@@ -193,6 +195,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/app_server/recommend_list", _App_RecommendList0_HTTP_Handler(srv))
 	r.POST("/api/app_server/withdraw", _App_Withdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit", _App_Deposit0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/download_data", _App_DownloadData0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_withdraw", _App_DepositWithdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_biw", _App_DepositBiw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_withdraw_biw", _App_DepositWithdrawBiw0_HTTP_Handler(srv))
@@ -418,6 +421,25 @@ func _App_Deposit0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error 
 			return err
 		}
 		reply := out.(*DepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_DownloadData0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DownloadDataRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppDownloadData)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DownloadData(ctx, req.(*DownloadDataRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DownloadDataReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1929,6 +1951,7 @@ type AppHTTPClient interface {
 	DepositBiw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	DepositWithdraw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	DepositWithdrawBiw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
+	DownloadData(ctx context.Context, req *DownloadDataRequest, opts ...http.CallOption) (rsp *DownloadDataReply, err error)
 	FeeRewardList(ctx context.Context, req *FeeRewardListRequest, opts ...http.CallOption) (rsp *FeeRewardListReply, err error)
 	LockSystem(ctx context.Context, req *LockSystemRequest, opts ...http.CallOption) (rsp *LockSystemReply, err error)
 	LockUser(ctx context.Context, req *LockUserRequest, opts ...http.CallOption) (rsp *LockUserReply, err error)
@@ -2803,6 +2826,19 @@ func (c *AppHTTPClientImpl) DepositWithdrawBiw(ctx context.Context, in *DepositR
 	pattern := "/api/admin_dhb/deposit_withdraw_biw"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppDepositWithdrawBiw))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) DownloadData(ctx context.Context, in *DownloadDataRequest, opts ...http.CallOption) (*DownloadDataReply, error) {
+	var out DownloadDataReply
+	pattern := "/api/admin_dhb/download_data"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppDownloadData))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

@@ -2448,6 +2448,37 @@ func (ub *UserBalanceRepo) GetWithdrawPassOrRewarded(ctx context.Context) ([]*bi
 	return res, nil
 }
 
+// GetWithdrawByUserIdsMap .
+func (ub *UserBalanceRepo) GetWithdrawByUserIdsMap(ctx context.Context, userIds []int64) (map[int64][]*biz.Withdraw, error) {
+	var withdraws []*Withdraw
+	res := make(map[int64][]*biz.Withdraw, 0)
+	if err := ub.data.db.Table("withdraw").Where("user_id in(?)", userIds).Where("status=?", "success").Find(&withdraws).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("WITHDRAW_NOT_FOUND", "withdraw not found")
+		}
+
+		return nil, errors.New(500, "WITHDRAW ERROR", err.Error())
+	}
+
+	for _, withdraw := range withdraws {
+		if _, ok := res[withdraw.UserId]; !ok {
+			res[withdraw.UserId] = make([]*biz.Withdraw, 0)
+		}
+		res[withdraw.UserId] = append(res[withdraw.UserId], &biz.Withdraw{
+			ID:              withdraw.ID,
+			UserId:          withdraw.UserId,
+			Amount:          withdraw.Amount,
+			RelAmount:       withdraw.RelAmount,
+			BalanceRecordId: withdraw.BalanceRecordId,
+			Status:          withdraw.Status,
+			Type:            withdraw.Type,
+			CreatedAt:       withdraw.CreatedAt,
+			AmountNew:       withdraw.AmountNew,
+		})
+	}
+	return res, nil
+}
+
 // GetWithdrawPassOrRewardedFirst .
 func (ub *UserBalanceRepo) GetWithdrawPassOrRewardedFirst(ctx context.Context) (*biz.Withdraw, error) {
 	var withdraw *Withdraw
@@ -3411,6 +3442,39 @@ func (ui *UserInfoRepo) GetAllBuyRecord(ctx context.Context) ([]*biz.BuyRecord, 
 
 	for _, v := range buyRecord {
 		res = append(res, &biz.BuyRecord{
+			ID:          v.ID,
+			UserId:      v.UserId,
+			Status:      v.Status,
+			Amount:      v.Amount,
+			AmountGet:   v.AmountGet,
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+			LastUpdated: v.LastUpdated,
+		})
+	}
+
+	return res, nil
+}
+
+// GetBuyRecordMap .
+func (ui *UserInfoRepo) GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*biz.BuyRecord, error) {
+	res := make(map[int64][]*biz.BuyRecord, 0)
+
+	var buyRecord []*BuyRecord
+	if err := ui.data.db.Table("buy_record").Where("user_id in(?)", userIds).
+		Order("id asc").Find(&buyRecord).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "buy_record ERROR", err.Error())
+	}
+
+	for _, v := range buyRecord {
+		if _, ok := res[v.UserId]; !ok {
+			res[v.UserId] = make([]*biz.BuyRecord, 0)
+		}
+		res[v.UserId] = append(res[v.UserId], &biz.BuyRecord{
 			ID:          v.ID,
 			UserId:      v.UserId,
 			Status:      v.Status,

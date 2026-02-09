@@ -112,6 +112,7 @@ type LocationRepo interface {
 	GetLocations(ctx context.Context, b *Pagination, userId int64, status string) ([]*LocationNew, error, int64)
 	GetLocationsOut(ctx context.Context, b *Pagination, userId int64, status string) ([]*Reward, error, int64)
 	GetLocations2(ctx context.Context, b *Pagination, userId int64) ([]*LocationNew, error, int64)
+	GetEthUserRecordList(ctx context.Context) (map[int64][]*EthUserRecord, error)
 	GetUserBalanceRecords(ctx context.Context, b *Pagination, userId int64, coinType string) ([]*UserBalanceRecord, error, int64)
 	GetUserBalanceRecordsTwo(ctx context.Context, userId int64) ([]*UserBalanceRecord, error)
 	GetEthUserRecordListByUserId(ctx context.Context, b *Pagination, userId int64) ([]*EthUserRecord, error, int64)

@@ -67,6 +67,12 @@ service App {
 		};
 	};
 
+	rpc DownloadData (DownloadDataRequest) returns (DownloadDataReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/download_data"
+		};
+	};
+
 	rpc DepositWithdraw (DepositRequest) returns (DepositReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/deposit_withdraw"
@@ -568,6 +574,14 @@ message EthAuthorizeReply {
 	string token = 1;
 }
 
+message DownloadDataRequest {
+}
+
+message DownloadDataReply {
+	string filename = 1;      // download_20260209_120000.xlsx
+	string contentType = 2;  // application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+	bytes  file = 3;          // xlsx 二进制内容
+}
 
 message DepositRequest {
 }

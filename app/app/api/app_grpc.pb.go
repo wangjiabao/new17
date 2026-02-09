@@ -27,6 +27,7 @@ const (
 	App_RecommendList_FullMethodName                        = "/api.App/RecommendList"
 	App_Withdraw_FullMethodName                             = "/api.App/Withdraw"
 	App_Deposit_FullMethodName                              = "/api.App/Deposit"
+	App_DownloadData_FullMethodName                         = "/api.App/DownloadData"
 	App_DepositWithdraw_FullMethodName                      = "/api.App/DepositWithdraw"
 	App_DepositBiw_FullMethodName                           = "/api.App/DepositBiw"
 	App_DepositWithdrawBiw_FullMethodName                   = "/api.App/DepositWithdrawBiw"
@@ -113,6 +114,7 @@ type AppClient interface {
 	RecommendList(ctx context.Context, in *RecommendListRequest, opts ...grpc.CallOption) (*RecommendListReply, error)
 	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	DownloadData(ctx context.Context, in *DownloadDataRequest, opts ...grpc.CallOption) (*DownloadDataReply, error)
 	DepositWithdraw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	DepositBiw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	DepositWithdrawBiw(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
@@ -261,6 +263,15 @@ func (c *appClient) Withdraw(ctx context.Context, in *WithdrawRequest, opts ...g
 func (c *appClient) Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
 	out := new(DepositReply)
 	err := c.cc.Invoke(ctx, App_Deposit_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) DownloadData(ctx context.Context, in *DownloadDataRequest, opts ...grpc.CallOption) (*DownloadDataReply, error) {
+	out := new(DownloadDataReply)
+	err := c.cc.Invoke(ctx, App_DownloadData_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -927,6 +938,7 @@ type AppServer interface {
 	RecommendList(context.Context, *RecommendListRequest) (*RecommendListReply, error)
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
+	DownloadData(context.Context, *DownloadDataRequest) (*DownloadDataReply, error)
 	DepositWithdraw(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositBiw(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositWithdrawBiw(context.Context, *DepositRequest) (*DepositReply, error)
@@ -1029,6 +1041,9 @@ func (UnimplementedAppServer) Withdraw(context.Context, *WithdrawRequest) (*With
 }
 func (UnimplementedAppServer) Deposit(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
+}
+func (UnimplementedAppServer) DownloadData(context.Context, *DownloadDataRequest) (*DownloadDataReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadData not implemented")
 }
 func (UnimplementedAppServer) DepositWithdraw(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DepositWithdraw not implemented")
@@ -1399,6 +1414,24 @@ func _App_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).Deposit(ctx, req.(*DepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_DownloadData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).DownloadData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_DownloadData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).DownloadData(ctx, req.(*DownloadDataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2737,6 +2770,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deposit",
 			Handler:    _App_Deposit_Handler,
+		},
+		{
+			MethodName: "DownloadData",
+			Handler:    _App_DownloadData_Handler,
 		},
 		{
 			MethodName: "DepositWithdraw",

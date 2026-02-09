@@ -789,6 +789,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/download_data:
+        get:
+            tags:
+                - App
+            operationId: App_DownloadData
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DownloadDataReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/fee:
         get:
             tags:
@@ -2417,6 +2435,16 @@ components:
         DepositReply:
             type: object
             properties: {}
+        DownloadDataReply:
+            type: object
+            properties:
+                filename:
+                    type: string
+                contentType:
+                    type: string
+                file:
+                    type: string
+                    format: bytes
         FeeRewardListReply:
             type: object
             properties:

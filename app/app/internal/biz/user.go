@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	transporthttp "github.com/go-kratos/kratos/v2/transport/http"
 	jwt2 "github.com/golang-jwt/jwt/v5"
+	"github.com/xuri/excelize/v2"
 	"io"
 	"math"
 	"os"
@@ -362,6 +363,7 @@ type UserBalanceRepo interface {
 	GetWithdrawByUserId(ctx context.Context, userId int64) ([]*Withdraw, error)
 	GetWithdraws(ctx context.Context, b *Pagination, userId int64, withdrawType string) ([]*Withdraw, error, int64)
 	GetWithdrawPassOrRewarded(ctx context.Context) ([]*Withdraw, error)
+	GetWithdrawByUserIdsMap(ctx context.Context, userIds []int64) (map[int64][]*Withdraw, error)
 	GetWithdrawPassOrRewardedFirst(ctx context.Context) (*Withdraw, error)
 	GetTradeOk(ctx context.Context) (*Trade, error)
 	GetTradeOkkCsd(ctx context.Context) (int64, error)
@@ -444,6 +446,7 @@ type UserCurrentMonthRecommendRepo interface {
 type UserInfoRepo interface {
 	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
 	GetAllBuyRecord(ctx context.Context) ([]*BuyRecord, error)
+	GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
 	UpdateUserRewardStakeReomve(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardStake(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardNew(ctx context.Context, id, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool) (int64, error)
@@ -11116,6 +11119,162 @@ func (uuc *UserUseCase) CheckAndInsertRecommendArea(ctx context.Context, req *v1
 	}
 
 	return &v1.CheckAndInsertRecommendAreaReply{}, nil
+}
+
+type DownloadRes struct {
+	Address  string
+	Deposit  uint64
+	Buy      uint64
+	Withdraw uint64
+}
+
+func (uuc *UserUseCase) DownloadData(ctx context.Context, req *v1.DownloadDataRequest) (*v1.DownloadDataReply, error) {
+	var (
+		recommendUsers []*UserRecommend
+		userIds        []int64
+		err            error
+	)
+	recommendUsers, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899")
+	if nil != err {
+		return nil, err
+	}
+
+	for _, v := range recommendUsers {
+		if strings.HasPrefix(v.RecommendCode, "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899D900") {
+			continue
+		}
+		userIds = append(userIds, v.UserId)
+	}
+
+	var (
+		ethRecords map[int64][]*EthUserRecord
+	)
+	ethRecords, err = uuc.locationRepo.GetEthUserRecordList(ctx)
+	if nil != err {
+		return nil, err
+	}
+
+	var (
+		usersMap map[int64]*User
+	)
+	usersMap, err = uuc.repo.GetUserByUserIdsTwo(ctx, userIds)
+	if nil != err {
+		return nil, err
+	}
+
+	var (
+		buyRecords map[int64][]*BuyRecord
+	)
+
+	buyRecords, err = uuc.uiRepo.GetBuyRecordMap(ctx, userIds)
+	if nil != err {
+		return nil, err
+	}
+
+	var (
+		withdraw map[int64][]*Withdraw
+	)
+	withdraw, err = uuc.ubRepo.GetWithdrawByUserIdsMap(ctx, userIds)
+	if nil != err {
+		return nil, err
+	}
+
+	res := make([]*DownloadRes, 0)
+	for _, v := range userIds {
+
+		tmpRes := &DownloadRes{
+			Address:  "",
+			Deposit:  0,
+			Buy:      0,
+			Withdraw: 0,
+		}
+
+		if _, ok := usersMap[v]; ok {
+			tmpRes.Address = usersMap[v].Address
+		}
+
+		if _, ok := ethRecords[v]; ok {
+			tmp1 := uint64(0)
+			for _, v1t := range ethRecords[v] {
+				tmp1 += v1t.AmountTwo
+			}
+			tmpRes.Deposit = tmp1
+		}
+
+		if _, ok := buyRecords[v]; ok {
+			tmp2 := uint64(0)
+			for _, v2t := range buyRecords[v] {
+				tmp2 += uint64(v2t.Amount)
+			}
+			tmpRes.Buy = tmp2
+		}
+
+		if _, ok := withdraw[v]; ok {
+			tmp3 := uint64(0)
+			for _, v3t := range withdraw[v] {
+				tmp3 += uint64(v3t.AmountNew)
+			}
+			tmpRes.Withdraw = tmp3
+		}
+
+		res = append(res, tmpRes)
+	}
+
+	fileBytes, err := buildDownloadExcel(res)
+	if err != nil {
+		return nil, err
+	}
+
+	// ✅ 返回（这里按“gRPC 返回 bytes”的方式写）
+	filename := "download_" + time.Now().Format("20060102_150405") + ".xlsx"
+	return &v1.DownloadDataReply{
+		Filename:    filename,
+		ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		File:        fileBytes,
+	}, nil
+}
+
+func buildDownloadExcel(res []*DownloadRes) ([]byte, error) {
+	f := excelize.NewFile()
+	sheet := "Sheet1"
+	f.SetSheetName("Sheet1", sheet)
+
+	// 表头
+	headers := []string{"Address", "Deposit", "Buy", "Withdraw"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		_ = f.SetCellValue(sheet, cell, h)
+	}
+
+	// 数据
+	for i, r := range res {
+		row := i + 2
+		_ = f.SetCellValue(sheet, fmt.Sprintf("A%d", row), r.Address)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", row), r.Deposit)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("C%d", row), r.Buy)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("D%d", row), r.Withdraw)
+	}
+
+	// 可选：冻结首行
+	_ = f.SetPanes(sheet, &excelize.Panes{
+		Freeze:      true,
+		Split:       false,
+		XSplit:      0,
+		YSplit:      1,
+		TopLeftCell: "A2",
+		ActivePane:  "bottomLeft",
+	})
+
+	// 可选：设置列宽
+	_ = f.SetColWidth(sheet, "A", "A", 44)
+	_ = f.SetColWidth(sheet, "B", "D", 16)
+
+	// 输出为 bytes
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1.VipCheckReply, error) {

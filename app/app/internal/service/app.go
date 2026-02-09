@@ -1980,6 +1980,10 @@ func (a *AppService) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1
 	return a.uuc.VipCheck(ctx, req)
 }
 
+func (a *AppService) DownloadData(ctx context.Context, req *v1.DownloadDataRequest) (*v1.DownloadDataReply, error) {
+	return a.uuc.DownloadData(ctx, req)
+}
+
 func (a *AppService) AdminUndoUpdate(ctx context.Context, req *v1.AdminUndoUpdateRequest) (*v1.AdminUndoUpdateReply, error) {
 	//return a.uuc.AdminUndoUpdate(ctx, req)
 	return &v1.AdminUndoUpdateReply{}, nil

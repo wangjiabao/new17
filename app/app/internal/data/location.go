@@ -1386,6 +1386,43 @@ func (lr *LocationRepo) GetLocations2(ctx context.Context, b *biz.Pagination, us
 	return res, nil, count
 }
 
+func (lr *LocationRepo) GetEthUserRecordList(ctx context.Context) (map[int64][]*biz.EthUserRecord, error) {
+	var (
+		ethUserRecord []*EthUserRecord
+	)
+
+	res := make(map[int64][]*biz.EthUserRecord, 0)
+
+	instance := lr.data.db.Table("eth_user_record")
+	if err := instance.Find(&ethUserRecord).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		}
+
+		return nil, errors.New(500, "LOCATION ERROR", err.Error())
+	}
+
+	for _, item := range ethUserRecord {
+		if _, ok := res[item.UserId]; !ok {
+			res[item.UserId] = make([]*biz.EthUserRecord, 0)
+		}
+
+		res[item.UserId] = append(res[item.UserId], &biz.EthUserRecord{
+			ID:        item.ID,
+			UserId:    item.UserId,
+			Hash:      item.Hash,
+			Status:    item.Status,
+			Type:      item.Type,
+			Amount:    item.Amount,
+			AmountTwo: item.AmountTwo,
+			CoinType:  item.CoinType,
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
 func (lr *LocationRepo) GetEthUserRecordListByUserId(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.EthUserRecord, error, int64) {
 	var (
 		count         int64
