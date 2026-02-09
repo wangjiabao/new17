@@ -5,14 +5,13 @@ import (
 	v1 "dhb/app/app/api"
 	"dhb/app/app/internal/conf"
 	"dhb/app/app/internal/service"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
+	"github.com/go-kratos/kratos/v2/transport/http"
 	jwt2 "github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/handlers"
-
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // NewHTTPServer new an HTTP server.
@@ -48,6 +47,8 @@ func NewHTTPServer(c *conf.Server, app *service.AppService, logger log.Logger) *
 	route := srv.Route("/api/admin_dhb")
 	//图片上传
 	route.POST("/upload", app.Upload)
+
+	route.GET("/download_data_two", app.DownloadDataTwo)
 	return srv
 }
 

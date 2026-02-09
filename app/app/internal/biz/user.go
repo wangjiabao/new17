@@ -11128,93 +11128,77 @@ type DownloadRes struct {
 	Withdraw uint64
 }
 
-func (uuc *UserUseCase) DownloadData(ctx context.Context, req *v1.DownloadDataRequest) (*v1.DownloadDataReply, error) {
+// internal/biz/user_usecase.go
+func (uuc *UserUseCase) BuildDownloadDataExcel(ctx context.Context) (string, string, []byte, error) {
 	var (
 		recommendUsers []*UserRecommend
 		userIds        []int64
 		err            error
 	)
+
 	recommendUsers, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899")
-	if nil != err {
-		return nil, err
+	if err != nil {
+		return "", "", nil, err
 	}
 
+	prefix := "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899D900"
 	for _, v := range recommendUsers {
-		if strings.HasPrefix(v.RecommendCode, "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899D900") {
+		if strings.HasPrefix(v.RecommendCode, prefix) {
 			continue
 		}
 		userIds = append(userIds, v.UserId)
 	}
 
-	var (
-		ethRecords map[int64][]*EthUserRecord
-	)
-	ethRecords, err = uuc.locationRepo.GetEthUserRecordList(ctx)
-	if nil != err {
-		return nil, err
+	ethRecords, err := uuc.locationRepo.GetEthUserRecordList(ctx)
+	if err != nil {
+		return "", "", nil, err
 	}
 
-	var (
-		usersMap map[int64]*User
-	)
-	usersMap, err = uuc.repo.GetUserByUserIdsTwo(ctx, userIds)
-	if nil != err {
-		return nil, err
+	usersMap, err := uuc.repo.GetUserByUserIdsTwo(ctx, userIds)
+	if err != nil {
+		return "", "", nil, err
 	}
 
-	var (
-		buyRecords map[int64][]*BuyRecord
-	)
-
-	buyRecords, err = uuc.uiRepo.GetBuyRecordMap(ctx, userIds)
-	if nil != err {
-		return nil, err
+	buyRecords, err := uuc.uiRepo.GetBuyRecordMap(ctx, userIds)
+	if err != nil {
+		return "", "", nil, err
 	}
 
-	var (
-		withdraw map[int64][]*Withdraw
-	)
-	withdraw, err = uuc.ubRepo.GetWithdrawByUserIdsMap(ctx, userIds)
-	if nil != err {
-		return nil, err
+	withdrawMap, err := uuc.ubRepo.GetWithdrawByUserIdsMap(ctx, userIds)
+	if err != nil {
+		return "", "", nil, err
 	}
 
-	res := make([]*DownloadRes, 0)
-	for _, v := range userIds {
+	res := make([]*DownloadRes, 0, len(userIds))
+	for _, uid := range userIds {
+		tmpRes := &DownloadRes{}
 
-		tmpRes := &DownloadRes{
-			Address:  "",
-			Deposit:  0,
-			Buy:      0,
-			Withdraw: 0,
+		if u, ok := usersMap[uid]; ok {
+			tmpRes.Address = u.Address
 		}
 
-		if _, ok := usersMap[v]; ok {
-			tmpRes.Address = usersMap[v].Address
-		}
-
-		if _, ok := ethRecords[v]; ok {
-			tmp1 := uint64(0)
-			for _, v1t := range ethRecords[v] {
-				tmp1 += v1t.AmountTwo
+		if list, ok := ethRecords[uid]; ok {
+			var sum uint64
+			for _, it := range list {
+				sum += it.AmountTwo
 			}
-			tmpRes.Deposit = tmp1
+			tmpRes.Deposit = sum
 		}
 
-		if _, ok := buyRecords[v]; ok {
-			tmp2 := uint64(0)
-			for _, v2t := range buyRecords[v] {
-				tmp2 += uint64(v2t.Amount)
+		if list, ok := buyRecords[uid]; ok {
+			var sum uint64
+			for _, it := range list {
+				sum += uint64(it.Amount)
 			}
-			tmpRes.Buy = tmp2
+			tmpRes.Buy = sum
 		}
 
-		if _, ok := withdraw[v]; ok {
-			tmp3 := uint64(0)
-			for _, v3t := range withdraw[v] {
-				tmp3 += uint64(v3t.AmountNew)
+		if list, ok := withdrawMap[uid]; ok {
+			var sum uint64
+			for _, it := range list {
+				sum += uint64(it.AmountNew)
 			}
-			tmpRes.Withdraw = tmp3
+			tmpRes.Withdraw = sum
 		}
 
 		res = append(res, tmpRes)
@@ -11222,16 +11206,12 @@ func (uuc *UserUseCase) DownloadData(ctx context.Context, req *v1.DownloadDataRe
 
 	fileBytes, err := buildDownloadExcel(res)
 	if err != nil {
-		return nil, err
+		return "", "", nil, err
 	}
 
-	// ✅ 返回（这里按“gRPC 返回 bytes”的方式写）
 	filename := "download_" + time.Now().Format("20060102_150405") + ".xlsx"
-	return &v1.DownloadDataReply{
-		Filename:    filename,
-		ContentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-		File:        fileBytes,
-	}, nil
+	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	return filename, contentType, fileBytes, nil
 }
 
 func buildDownloadExcel(res []*DownloadRes) ([]byte, error) {
