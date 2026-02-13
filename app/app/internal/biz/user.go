@@ -11231,7 +11231,7 @@ func buildDownloadExcel(res []*DownloadRes) ([]byte, error) {
 	f.SetSheetName("Sheet1", sheet)
 
 	// 表头
-	headers := []string{"Address", "Deposit", "Buy", "Withdraw"}
+	headers := []string{"地址", "充值", "认购", "提现", "注册时间"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		_ = f.SetCellValue(sheet, cell, h)
@@ -11337,7 +11337,7 @@ func buildDownloadExcelThree(res []*DownloadResTwo) ([]byte, error) {
 	f.SetSheetName("Sheet1", sheet)
 
 	// 表头
-	headers := []string{"Address", "Deposit", "Buy", "Withdraw"}
+	headers := []string{"地址", "用户注册时间", "认购金额", "出局总金额", "已释放金额", "认购时间"}
 	for i, h := range headers {
 		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
 		_ = f.SetCellValue(sheet, cell, h)

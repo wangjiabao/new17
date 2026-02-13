@@ -685,6 +685,7 @@ func (u *UserRepo) GetUserByUserIdsTwo(ctx context.Context, userIds []int64) (ma
 			MyTotalAmount:          item.MyTotalAmount,
 			Vip:                    item.Vip,
 			AmountSelf:             item.AmountSelf,
+			CreatedAt:              item.CreatedAt,
 		}
 	}
 	return res, nil
