@@ -11122,10 +11122,20 @@ func (uuc *UserUseCase) CheckAndInsertRecommendArea(ctx context.Context, req *v1
 }
 
 type DownloadRes struct {
-	Address  string
-	Deposit  uint64
-	Buy      uint64
-	Withdraw uint64
+	Address   string
+	Deposit   uint64
+	Buy       uint64
+	Withdraw  uint64
+	CreatedAt time.Time
+}
+
+type DownloadResTwo struct {
+	Address       string
+	Amount        uint64
+	Total         float64
+	Reward        float64
+	UserCreatedAt time.Time
+	CreatedAt     time.Time
 }
 
 // internal/biz/user_usecase.go
@@ -11175,6 +11185,7 @@ func (uuc *UserUseCase) BuildDownloadDataExcel(ctx context.Context) (string, str
 
 		if u, ok := usersMap[uid]; ok {
 			tmpRes.Address = u.Address
+			tmpRes.CreatedAt = u.CreatedAt
 		}
 
 		if list, ok := ethRecords[uid]; ok {
@@ -11233,6 +11244,7 @@ func buildDownloadExcel(res []*DownloadRes) ([]byte, error) {
 		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", row), r.Deposit)
 		_ = f.SetCellValue(sheet, fmt.Sprintf("C%d", row), r.Buy)
 		_ = f.SetCellValue(sheet, fmt.Sprintf("D%d", row), r.Withdraw)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("E%d", row), r.CreatedAt)
 	}
 
 	// 可选：冻结首行
@@ -11247,7 +11259,114 @@ func buildDownloadExcel(res []*DownloadRes) ([]byte, error) {
 
 	// 可选：设置列宽
 	_ = f.SetColWidth(sheet, "A", "A", 44)
-	_ = f.SetColWidth(sheet, "B", "D", 16)
+	_ = f.SetColWidth(sheet, "B", "E", 30)
+
+	// 输出为 bytes
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (uuc *UserUseCase) BuildDownloadDataExcelThree(ctx context.Context) (string, string, []byte, error) {
+	var (
+		recommendUsers []*UserRecommend
+		userIds        []int64
+		err            error
+	)
+
+	recommendUsers, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899")
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	prefix := "D6D12D13D14D15D621D627D629D630D631D632D633D635D637D638D639D646D658D660D662D669D670D672D673D738D888D898D899D900"
+	for _, v := range recommendUsers {
+		if strings.HasPrefix(v.RecommendCode, prefix) {
+			continue
+		}
+		userIds = append(userIds, v.UserId)
+	}
+
+	usersMap, err := uuc.repo.GetUserByUserIdsTwo(ctx, userIds)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	buyRecords, err := uuc.uiRepo.GetBuyRecordMap(ctx, userIds)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	res := make([]*DownloadResTwo, 0, len(userIds))
+	for _, uid := range userIds {
+
+		if list, okT := buyRecords[uid]; okT {
+
+			for _, it := range list {
+				tmpRes := &DownloadResTwo{}
+
+				if u, ok := usersMap[uid]; ok {
+					tmpRes.Address = u.Address
+					tmpRes.UserCreatedAt = u.CreatedAt
+				}
+
+				tmpRes.Amount = uint64(it.Amount)
+				tmpRes.Reward = it.AmountGet
+				tmpRes.Total = it.Amount * 2.5
+				tmpRes.CreatedAt = it.CreatedAt
+				res = append(res, tmpRes)
+			}
+		}
+	}
+
+	fileBytes, err := buildDownloadExcelThree(res)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	filename := "download_" + time.Now().Format("20060102_150405") + ".xlsx"
+	contentType := "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	return filename, contentType, fileBytes, nil
+}
+
+func buildDownloadExcelThree(res []*DownloadResTwo) ([]byte, error) {
+	f := excelize.NewFile()
+	sheet := "Sheet1"
+	f.SetSheetName("Sheet1", sheet)
+
+	// 表头
+	headers := []string{"Address", "Deposit", "Buy", "Withdraw"}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		_ = f.SetCellValue(sheet, cell, h)
+	}
+
+	// 数据
+	for i, r := range res {
+		row := i + 2
+		_ = f.SetCellValue(sheet, fmt.Sprintf("A%d", row), r.Address)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("B%d", row), r.UserCreatedAt)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("C%d", row), r.Amount)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("D%d", row), r.Total)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("E%d", row), r.Reward)
+		_ = f.SetCellValue(sheet, fmt.Sprintf("F%d", row), r.CreatedAt)
+	}
+
+	// 可选：冻结首行
+	_ = f.SetPanes(sheet, &excelize.Panes{
+		Freeze:      true,
+		Split:       false,
+		XSplit:      0,
+		YSplit:      1,
+		TopLeftCell: "A2",
+		ActivePane:  "bottomLeft",
+	})
+
+	// 可选：设置列宽
+	_ = f.SetColWidth(sheet, "A", "A", 44)
+	_ = f.SetColWidth(sheet, "B", "F", 30)
 
 	// 输出为 bytes
 	buf, err := f.WriteToBuffer()

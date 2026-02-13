@@ -1995,6 +1995,21 @@ func (a *AppService) DownloadDataTwo(ctx transporthttp.Context) error {
 	return nil
 }
 
+func (a *AppService) DownloadDataThree(ctx transporthttp.Context) error {
+	filename, contentType, data, err := a.uuc.BuildDownloadDataExcelThree(ctx)
+	if err != nil {
+		return err
+	}
+
+	w := ctx.Response()
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Disposition", contentDisposition(filename))
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
+	return nil
+}
+
 func contentDisposition(filename string) string {
 	// 兼容中文文件名
 	return `attachment; filename="download.xlsx"; filename*=UTF-8''` + url.PathEscape(filename)

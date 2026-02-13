@@ -49,6 +49,7 @@ func NewHTTPServer(c *conf.Server, app *service.AppService, logger log.Logger) *
 	route.POST("/upload", app.Upload)
 
 	route.GET("/download_data_two", app.DownloadDataTwo)
+	route.GET("/download_data_three", app.DownloadDataThree)
 	return srv
 }
 
