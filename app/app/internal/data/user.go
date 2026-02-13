@@ -3457,6 +3457,39 @@ func (ui *UserInfoRepo) GetAllBuyRecord(ctx context.Context) ([]*biz.BuyRecord, 
 	return res, nil
 }
 
+// GetBuyRecordingMap .
+func (ui *UserInfoRepo) GetBuyRecordingMap(ctx context.Context, userIds []int64) (map[int64][]*biz.BuyRecord, error) {
+	res := make(map[int64][]*biz.BuyRecord, 0)
+
+	var buyRecord []*BuyRecord
+	if err := ui.data.db.Table("buy_record").Where("user_id in(?)", userIds).Where("status=?", 1).
+		Order("id asc").Find(&buyRecord).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, nil
+		}
+
+		return nil, errors.New(500, "buy_record ERROR", err.Error())
+	}
+
+	for _, v := range buyRecord {
+		if _, ok := res[v.UserId]; !ok {
+			res[v.UserId] = make([]*biz.BuyRecord, 0)
+		}
+		res[v.UserId] = append(res[v.UserId], &biz.BuyRecord{
+			ID:          v.ID,
+			UserId:      v.UserId,
+			Status:      v.Status,
+			Amount:      v.Amount,
+			AmountGet:   v.AmountGet,
+			CreatedAt:   v.CreatedAt,
+			UpdatedAt:   v.UpdatedAt,
+			LastUpdated: v.LastUpdated,
+		})
+	}
+
+	return res, nil
+}
+
 // GetBuyRecordMap .
 func (ui *UserInfoRepo) GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*biz.BuyRecord, error) {
 	res := make(map[int64][]*biz.BuyRecord, 0)

@@ -447,6 +447,7 @@ type UserInfoRepo interface {
 	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
 	GetAllBuyRecord(ctx context.Context) ([]*BuyRecord, error)
 	GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
+	GetBuyRecordingMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
 	UpdateUserRewardStakeReomve(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardStake(ctx context.Context, userId int64, amountUsdt float64, stakeId int64) (int64, error)
 	UpdateUserRewardNew(ctx context.Context, id, userId int64, amountUsdt float64, amountUsdtTotal float64, stop bool) (int64, error)
@@ -11259,7 +11260,7 @@ func buildDownloadExcel(res []*DownloadRes) ([]byte, error) {
 
 	// 可选：设置列宽
 	_ = f.SetColWidth(sheet, "A", "A", 44)
-	_ = f.SetColWidth(sheet, "B", "E", 30)
+	_ = f.SetColWidth(sheet, "B", "E", 40)
 
 	// 输出为 bytes
 	buf, err := f.WriteToBuffer()
@@ -11294,7 +11295,7 @@ func (uuc *UserUseCase) BuildDownloadDataExcelThree(ctx context.Context) (string
 		return "", "", nil, err
 	}
 
-	buyRecords, err := uuc.uiRepo.GetBuyRecordMap(ctx, userIds)
+	buyRecords, err := uuc.uiRepo.GetBuyRecordingMap(ctx, userIds)
 	if err != nil {
 		return "", "", nil, err
 	}
@@ -11366,7 +11367,7 @@ func buildDownloadExcelThree(res []*DownloadResTwo) ([]byte, error) {
 
 	// 可选：设置列宽
 	_ = f.SetColWidth(sheet, "A", "A", 44)
-	_ = f.SetColWidth(sheet, "B", "F", 30)
+	_ = f.SetColWidth(sheet, "B", "F", 40)
 
 	// 输出为 bytes
 	buf, err := f.WriteToBuffer()
