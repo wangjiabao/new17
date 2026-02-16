@@ -2860,7 +2860,7 @@ func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64
 
 	res = ui.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
-		Updates(map[string]interface{}{"balance_raw_float": gorm.Expr("balance_raw_float + ?", amountIspay)})
+		Updates(map[string]interface{}{"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", amountIspay)})
 	if res.Error != nil {
 		return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
 	}
@@ -2943,7 +2943,7 @@ func (ui *UserInfoRepo) UpdateUserMyTotalAmountAdd(ctx context.Context, userId i
 
 		res = ui.data.DB(ctx).Table("user_balance").
 			Where("user_id=?", userId).
-			Updates(map[string]interface{}{"balance_raw_float": gorm.Expr("balance_raw_float + ?", myTotal)})
+			Updates(map[string]interface{}{"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", myTotal)})
 		if res.Error != nil {
 			return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
 		}
@@ -3049,7 +3049,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommend2(ctx context.Context, id, user
 			Where("user_id=?", userId).
 			Updates(map[string]interface{}{
 				"balance_usdt_float":    gorm.Expr("balance_usdt_float + ?", usdt),
-				"balance_raw_float":     gorm.Expr("balance_raw_float + ?", raw),
+				"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", raw),
 				"recommend_total_float": gorm.Expr("recommend_total_float + ?", usdtOrigin),
 			}).Error; nil != err {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3091,7 +3091,7 @@ func (ui *UserInfoRepo) UpdateUserSubBuyRecord(ctx context.Context, id, userId i
 
 	res = ui.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
-		Updates(map[string]interface{}{"balance_raw_float": gorm.Expr("balance_raw_float - ?", amountOrigin)})
+		Updates(map[string]interface{}{"balance_raw_float_new": gorm.Expr("balance_raw_float_new - ?", amountOrigin)})
 	if res.Error != nil {
 		return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
 	}
@@ -3146,9 +3146,9 @@ func (ui *UserInfoRepo) UpdateUserRewardDailyLocation(ctx context.Context, id, u
 		if err = ui.data.DB(ctx).Table("user_balance").
 			Where("user_id=?", userId).
 			Updates(map[string]interface{}{
-				"balance_usdt_float":   gorm.Expr("balance_usdt_float + ?", usdt),
-				"balance_raw_float":    gorm.Expr("balance_raw_float + ?", raw),
-				"location_total_float": gorm.Expr("location_total_float + ?", usdtOrigin),
+				"balance_usdt_float":    gorm.Expr("balance_usdt_float + ?", usdt),
+				"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", raw),
+				"location_total_float":  gorm.Expr("location_total_float + ?", usdtOrigin),
 			}).Error; nil != err {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
 		}
@@ -3209,9 +3209,9 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 			if err = ui.data.DB(ctx).Table("user_balance").
 				Where("user_id=?", userId).
 				Updates(map[string]interface{}{
-					"balance_usdt_float":   gorm.Expr("balance_usdt_float + ?", usdt),
-					"balance_raw_float":    gorm.Expr("balance_raw_float + ?", raw),
-					"area_total_float_two": gorm.Expr("area_total_float_two + ?", usdtOrigin),
+					"balance_usdt_float":    gorm.Expr("balance_usdt_float + ?", usdt),
+					"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", raw),
+					"area_total_float_two":  gorm.Expr("area_total_float_two + ?", usdtOrigin),
 				}).Error; nil != err {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
 			}
@@ -3232,9 +3232,9 @@ func (ui *UserInfoRepo) UpdateUserRewardAreaOne(ctx context.Context, id, userId 
 			if err = ui.data.DB(ctx).Table("user_balance").
 				Where("user_id=?", userId).
 				Updates(map[string]interface{}{
-					"balance_usdt_float": gorm.Expr("balance_usdt_float + ?", usdt),
-					"balance_raw_float":  gorm.Expr("balance_raw_float + ?", raw),
-					"area_total_float":   gorm.Expr("area_total_float + ?", usdtOrigin),
+					"balance_usdt_float":    gorm.Expr("balance_usdt_float + ?", usdt),
+					"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", raw),
+					"area_total_float":      gorm.Expr("area_total_float + ?", usdtOrigin),
 				}).Error; nil != err {
 				return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
 			}
@@ -3343,7 +3343,7 @@ func (ui *UserInfoRepo) UpdateUserRewardRecommendNewTwo(ctx context.Context, id,
 			Where("user_id=?", userId).
 			Updates(map[string]interface{}{
 				"balance_usdt_float":        gorm.Expr("balance_usdt_float + ?", usdt),
-				"balance_raw_float":         gorm.Expr("balance_raw_float + ?", raw),
+				"balance_raw_float_new":     gorm.Expr("balance_raw_float_new + ?", raw),
 				"recommend_total_float_two": gorm.Expr("recommend_total_float_two + ?", usdtOrigin),
 			}).Error; nil != err {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
@@ -3406,9 +3406,9 @@ func (ui *UserInfoRepo) UpdateUserRewardAllNew(ctx context.Context, id, userId i
 		if err = ui.data.DB(ctx).Table("user_balance").
 			Where("user_id=?", userId).
 			Updates(map[string]interface{}{
-				"balance_usdt_float": gorm.Expr("balance_usdt_float + ?", usdt),
-				"balance_raw_float":  gorm.Expr("balance_raw_float + ?", raw),
-				"all_float":          gorm.Expr("all_float + ?", usdtOrigin),
+				"balance_usdt_float":    gorm.Expr("balance_usdt_float + ?", usdt),
+				"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", raw),
+				"all_float":             gorm.Expr("all_float + ?", usdtOrigin),
 			}).Error; nil != err {
 			return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
 		}
@@ -3566,7 +3566,7 @@ func (ui *UserInfoRepo) UpdateUserRewardStakeReomve(ctx context.Context, userId 
 
 	if err = ui.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
-		Updates(map[string]interface{}{"balance_raw_float": gorm.Expr("balance_raw_float + ?", amountUsdt)}).Error; nil != err {
+		Updates(map[string]interface{}{"balance_raw_float_new": gorm.Expr("balance_raw_float_new + ?", amountUsdt)}).Error; nil != err {
 		return 0, errors.NotFound("user balance err", "user balance not found")
 	}
 
@@ -4333,7 +4333,7 @@ func (ui *UserInfoRepo) UpdateUserIspay(ctx context.Context, userId int64, amoun
 	var err error
 	if err = ui.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
-		Updates(map[string]interface{}{"balance_raw_float": float64(amount)}).Error; nil != err {
+		Updates(map[string]interface{}{"balance_raw_float_new": float64(amount)}).Error; nil != err {
 		return errors.NotFound("user balance err", "user balance not found")
 	}
 
