@@ -202,6 +202,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId, pId int64, amo
 	lockAll.Lock()
 	defer lockAll.Unlock()
 
+	t := time.Date(2026, 2, 18, 14, 0, 0, 0, time.UTC)
 	// 推荐人
 	var (
 		err       error
@@ -529,6 +530,18 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId, pId int64, amo
 				}
 
 				for _, vUserRecords := range userBuyRecords[tmpUserId] {
+
+					if vUserRecords.CreatedAt.After(t) {
+						amountB := uint64(vUserRecords.Amount)
+						if 4999 <= amountB && 15001 > amountB {
+							num = 3
+						} else if 29999 <= amountB && 50001 > amountB {
+							num = 3.5
+						} else if 99999 <= amountB && 150001 > amountB {
+							num = 4
+						}
+					}
+
 					if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 						fmt.Println("错误的数据，已经最大却没停，all充值推荐", vUserRecords)
 						continue
@@ -540,7 +553,7 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId, pId int64, amo
 					tmpU := amountRecommendTmp
 					if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
 						tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
-						vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+						vUserRecords.AmountGet = vUserRecords.Amount * num
 						stopRecommend = true
 					}
 

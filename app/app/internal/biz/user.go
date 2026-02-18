@@ -827,6 +827,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		usersMap[vUsers.ID] = vUsers
 	}
 
+	t := time.Date(2026, 2, 18, 14, 0, 0, 0, time.UTC)
 	for _, vUsers := range users {
 		if _, ok := userBalances[vUsers.ID]; !ok {
 			continue
@@ -848,10 +849,20 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			tmpCurrentUsdtAmount = vUsers.Amount
 		}
 		for _, vBuy := range userBuys {
-			tmpAll += vBuy.Amount
+			num := 2.5
+			if vBuy.CreatedAt.After(t) {
+				amountB := uint64(vBuy.Amount)
+				if 4999 <= amountB && 15001 > amountB {
+					num = 3
+				} else if 29999 <= amountB && 50001 > amountB {
+					num = 3.5
+				} else if 99999 <= amountB && 150001 > amountB {
+					num = 4
+				}
+			}
+			tmpAll += vBuy.Amount * num
 			tmpGet += vBuy.AmountGet
 		}
-		tmpAll *= 2.5
 
 		if tmpAll > tmpGet {
 			tmpGetSub = tmpAll - tmpGet
@@ -1132,6 +1143,28 @@ func (uuc *UserUseCase) LockUser(ctx context.Context, req *v1.LockUserRequest) (
 	_, err = uuc.repo.LockUser(ctx, req.SendBody.UserId, lock)
 	if nil != err {
 		return res, err
+	}
+
+	// 推荐
+	var (
+		userRecommend *UserRecommend
+		team          []*UserRecommend
+	)
+	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, req.SendBody.UserId)
+	if nil == userRecommend || nil != err {
+		return res, nil
+	}
+
+	team, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, userRecommend.RecommendCode+"D"+strconv.FormatInt(req.SendBody.UserId, 10))
+	if nil != err {
+		return res, nil
+	}
+
+	for _, v := range team {
+		_, err = uuc.repo.LockUser(ctx, v.UserId, lock)
+		if nil != err {
+			fmt.Println("锁定错误", err, v, lock)
+		}
 	}
 
 	return res, nil
@@ -4748,9 +4781,21 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 		userBuyRecords[v.UserId] = append(userBuyRecords[v.UserId], v)
 	}
 
+	t := time.Date(2026, 2, 18, 14, 0, 0, 0, time.UTC)
 	// 静态
 	for _, tmpBuyRecords := range buyRecords {
-		if tmpBuyRecords.Amount*2.5 <= tmpBuyRecords.AmountGet {
+		num := 2.5
+		if tmpBuyRecords.CreatedAt.After(t) {
+			amountB := uint64(tmpBuyRecords.Amount)
+			if 4999 <= amountB && 15001 > amountB {
+				num = 3
+			} else if 29999 <= amountB && 50001 > amountB {
+				num = 3.5
+			} else if 99999 <= amountB && 150001 > amountB {
+				num = 4
+			}
+		}
+		if tmpBuyRecords.Amount*num <= tmpBuyRecords.AmountGet {
 			fmt.Println("错误的数据，已经最大却没停，daily", tmpBuyRecords)
 			continue
 		}
@@ -4784,9 +4829,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 		stop := false
 		tmp := tmpBuyRecords.Amount * numTwo
-		if tmp+tmpBuyRecords.AmountGet >= tmpBuyRecords.Amount*2.5 {
-			tmp = math.Abs(tmpBuyRecords.Amount*2.5 - tmpBuyRecords.AmountGet)
-			tmpBuyRecords.AmountGet = tmpBuyRecords.Amount * 2.5
+		if tmp+tmpBuyRecords.AmountGet >= tmpBuyRecords.Amount*num {
+			tmp = math.Abs(tmpBuyRecords.Amount*num - tmpBuyRecords.AmountGet)
+			tmpBuyRecords.AmountGet = tmpBuyRecords.Amount * num
 			stop = true
 		} else {
 			tmpBuyRecords.AmountGet += tmp
@@ -4855,6 +4900,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 	// 团队和平级
 	for _, tmpBuyRecords := range buyRecords {
+		num := 2.5
 		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
 			continue
 		}
@@ -5114,7 +5160,18 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，recommend", vUserRecords)
 					continue
 				}
@@ -5123,9 +5180,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 				tmpU := tmpAreaAmount
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
@@ -5208,6 +5265,7 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 	// 直推加速
 	for _, tmpBuyRecords := range buyRecords {
+		num := 2.5
 		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
 			continue
 		}
@@ -5344,7 +5402,18 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，加速", vUserRecords)
 					continue
 				}
@@ -5353,9 +5422,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 					stopArea bool
 				)
 				tmpU := tmpAreaAmount
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
@@ -5461,12 +5530,23 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
+				num := 2.5
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停， all1", vUserRecords)
 					continue
 				}
@@ -5476,9 +5556,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				)
 
 				tmpU := levelTmp
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
@@ -5559,12 +5639,23 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
+				num := 2.5
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all2", vUserRecords)
 					continue
 				}
@@ -5574,9 +5665,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				)
 
 				tmpU := levelTmp
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
@@ -5657,12 +5748,23 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
+				num := 2.5
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all3", vUserRecords)
 					continue
 				}
@@ -5672,9 +5774,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				)
 
 				tmpU := levelTmp
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
@@ -5755,12 +5857,23 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
+				num := 2.5
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all4", vUserRecords)
 					continue
 				}
@@ -5770,9 +5883,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				)
 
 				tmpU := levelTmp
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
@@ -5853,12 +5966,23 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			levelTmp := tmpLevelC
 			for _, vUserRecords := range userBuyRecords[tmpUsers.ID] {
+				num := 2.5
 				// 本次执行已经出局
 				if _, ok := stopUserIds[vUserRecords.ID]; ok {
 					continue
 				}
 
-				if vUserRecords.Amount*2.5 <= vUserRecords.AmountGet {
+				if vUserRecords.CreatedAt.After(t) {
+					amountB := uint64(vUserRecords.Amount)
+					if 4999 <= amountB && 15001 > amountB {
+						num = 3
+					} else if 29999 <= amountB && 50001 > amountB {
+						num = 3.5
+					} else if 99999 <= amountB && 150001 > amountB {
+						num = 4
+					}
+				}
+				if vUserRecords.Amount*num <= vUserRecords.AmountGet {
 					fmt.Println("错误的数据，已经最大却没停，all5", vUserRecords)
 					continue
 				}
@@ -5868,9 +5992,9 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 				)
 
 				tmpU := levelTmp
-				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*2.5 {
-					tmpU = math.Abs(vUserRecords.Amount*2.5 - vUserRecords.AmountGet)
-					vUserRecords.AmountGet = vUserRecords.Amount * 2.5
+				if tmpU+vUserRecords.AmountGet >= vUserRecords.Amount*num {
+					tmpU = math.Abs(vUserRecords.Amount*num - vUserRecords.AmountGet)
+					vUserRecords.AmountGet = vUserRecords.Amount * num
 					stopArea = true
 				} else {
 					vUserRecords.AmountGet += tmpU
