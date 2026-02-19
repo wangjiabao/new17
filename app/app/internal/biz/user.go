@@ -1145,25 +1145,27 @@ func (uuc *UserUseCase) LockUser(ctx context.Context, req *v1.LockUserRequest) (
 		return res, err
 	}
 
-	// 推荐
-	var (
-		userRecommend *UserRecommend
-		team          []*UserRecommend
-	)
-	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, req.SendBody.UserId)
-	if nil == userRecommend || nil != err {
-		return res, nil
-	}
+	if 1 == req.SendBody.One {
+		// 推荐
+		var (
+			userRecommend *UserRecommend
+			team          []*UserRecommend
+		)
+		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, req.SendBody.UserId)
+		if nil == userRecommend || nil != err {
+			return res, nil
+		}
 
-	team, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, userRecommend.RecommendCode+"D"+strconv.FormatInt(req.SendBody.UserId, 10))
-	if nil != err {
-		return res, nil
-	}
-
-	for _, v := range team {
-		_, err = uuc.repo.LockUser(ctx, v.UserId, lock)
+		team, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, userRecommend.RecommendCode+"D"+strconv.FormatInt(req.SendBody.UserId, 10))
 		if nil != err {
-			fmt.Println("锁定错误", err, v, lock)
+			return res, nil
+		}
+
+		for _, v := range team {
+			_, err = uuc.repo.LockUser(ctx, v.UserId, lock)
+			if nil != err {
+				fmt.Println("锁定错误", err, v, lock)
+			}
 		}
 	}
 

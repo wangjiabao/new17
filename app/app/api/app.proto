@@ -1388,6 +1388,7 @@ message LockUserRequest {
 	message SendBody{
 		int64 user_id = 1;
 		int64 lock = 2;
+		int64 one = 3;
 	}
 
 	SendBody send_body = 1;

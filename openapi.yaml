@@ -2480,6 +2480,8 @@ components:
                     type: string
                 lock:
                     type: string
+                one:
+                    type: string
         LockUserRewardReply:
             type: object
             properties: {}
