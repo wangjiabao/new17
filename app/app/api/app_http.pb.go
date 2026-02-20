@@ -27,6 +27,8 @@ const OperationAppAdminAmountFourUpdate = "/api.App/AdminAmountFourUpdate"
 const OperationAppAdminAreaLevelUpdate = "/api.App/AdminAreaLevelUpdate"
 const OperationAppAdminBalanceUpdate = "/api.App/AdminBalanceUpdate"
 const OperationAppAdminBuyList = "/api.App/AdminBuyList"
+const OperationAppAdminBuyListThree = "/api.App/AdminBuyListThree"
+const OperationAppAdminBuyListTwo = "/api.App/AdminBuyListTwo"
 const OperationAppAdminChangeAddress = "/api.App/AdminChangeAddress"
 const OperationAppAdminChangePassword = "/api.App/AdminChangePassword"
 const OperationAppAdminConfig = "/api.App/AdminConfig"
@@ -34,6 +36,8 @@ const OperationAppAdminConfigUpdate = "/api.App/AdminConfigUpdate"
 const OperationAppAdminConfigUpdateListen = "/api.App/AdminConfigUpdateListen"
 const OperationAppAdminCreateAccount = "/api.App/AdminCreateAccount"
 const OperationAppAdminCreateGoods = "/api.App/AdminCreateGoods"
+const OperationAppAdminCreateGoodsThree = "/api.App/AdminCreateGoodsThree"
+const OperationAppAdminCreateGoodsTwo = "/api.App/AdminCreateGoodsTwo"
 const OperationAppAdminDailyAreaReward = "/api.App/AdminDailyAreaReward"
 const OperationAppAdminDailyBalanceReward = "/api.App/AdminDailyBalanceReward"
 const OperationAppAdminDailyFee = "/api.App/AdminDailyFee"
@@ -44,6 +48,8 @@ const OperationAppAdminDailyRecommendReward = "/api.App/AdminDailyRecommendRewar
 const OperationAppAdminDailyReward = "/api.App/AdminDailyReward"
 const OperationAppAdminFee = "/api.App/AdminFee"
 const OperationAppAdminGoodList = "/api.App/AdminGoodList"
+const OperationAppAdminGoodListThree = "/api.App/AdminGoodListThree"
+const OperationAppAdminGoodListTwo = "/api.App/AdminGoodListTwo"
 const OperationAppAdminList = "/api.App/AdminList"
 const OperationAppAdminLocationAllList = "/api.App/AdminLocationAllList"
 const OperationAppAdminLocationInsert = "/api.App/AdminLocationInsert"
@@ -83,6 +89,7 @@ const OperationAppDeposit3 = "/api.App/Deposit3"
 const OperationAppDeposit4 = "/api.App/Deposit4"
 const OperationAppDeposit5 = "/api.App/Deposit5"
 const OperationAppDepositBiw = "/api.App/DepositBiw"
+const OperationAppDepositOnly = "/api.App/DepositOnly"
 const OperationAppDepositWithdraw = "/api.App/DepositWithdraw"
 const OperationAppDepositWithdrawBiw = "/api.App/DepositWithdrawBiw"
 const OperationAppDownloadData = "/api.App/DownloadData"
@@ -110,6 +117,8 @@ type AppHTTPServer interface {
 	AdminAreaLevelUpdate(context.Context, *AdminAreaLevelUpdateRequest) (*AdminAreaLevelUpdateReply, error)
 	AdminBalanceUpdate(context.Context, *AdminBalanceUpdateRequest) (*AdminBalanceUpdateReply, error)
 	AdminBuyList(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error)
+	AdminBuyListThree(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error)
+	AdminBuyListTwo(context.Context, *AdminBuyListRequest) (*AdminBuyListReply, error)
 	AdminChangeAddress(context.Context, *AdminChangeAddressRequest) (*AdminChangeAddressReply, error)
 	AdminChangePassword(context.Context, *AdminChangePasswordRequest) (*AdminChangePasswordReply, error)
 	AdminConfig(context.Context, *AdminConfigRequest) (*AdminConfigReply, error)
@@ -117,6 +126,8 @@ type AppHTTPServer interface {
 	AdminConfigUpdateListen(context.Context, *AdminConfigUpdateListenRequest) (*AdminConfigUpdateListenReply, error)
 	AdminCreateAccount(context.Context, *AdminCreateAccountRequest) (*AdminCreateAccountReply, error)
 	AdminCreateGoods(context.Context, *AdminCreateGoodsRequest) (*AdminCreateGoodsReply, error)
+	AdminCreateGoodsThree(context.Context, *AdminCreateGoodsRequest) (*AdminCreateGoodsReply, error)
+	AdminCreateGoodsTwo(context.Context, *AdminCreateGoodsRequest) (*AdminCreateGoodsReply, error)
 	AdminDailyAreaReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
 	AdminDailyBalanceReward(context.Context, *AdminDailyBalanceRewardRequest) (*AdminDailyBalanceRewardReply, error)
 	AdminDailyFee(context.Context, *AdminDailyFeeRequest) (*AdminDailyFeeReply, error)
@@ -127,6 +138,8 @@ type AppHTTPServer interface {
 	AdminDailyReward(context.Context, *AdminDailyRewardRequest) (*AdminDailyRewardReply, error)
 	AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error)
 	AdminGoodList(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error)
+	AdminGoodListThree(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error)
+	AdminGoodListTwo(context.Context, *AdminGoodListRequest) (*AdminGoodListReply, error)
 	AdminList(context.Context, *AdminListRequest) (*AdminListReply, error)
 	AdminLocationAllList(context.Context, *AdminLocationAllListRequest) (*AdminLocationAllListReply, error)
 	AdminLocationInsert(context.Context, *AdminLocationInsertRequest) (*AdminLocationInsertReply, error)
@@ -166,6 +179,7 @@ type AppHTTPServer interface {
 	Deposit4(context.Context, *DepositRequest) (*DepositReply, error)
 	Deposit5(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositBiw(context.Context, *DepositRequest) (*DepositReply, error)
+	DepositOnly(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositWithdraw(context.Context, *DepositRequest) (*DepositReply, error)
 	DepositWithdrawBiw(context.Context, *DepositRequest) (*DepositReply, error)
 	DownloadData(context.Context, *DownloadDataRequest) (*DownloadDataReply, error)
@@ -195,6 +209,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/app_server/recommend_list", _App_RecommendList0_HTTP_Handler(srv))
 	r.POST("/api/app_server/withdraw", _App_Withdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit", _App_Deposit0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/deposit_only", _App_DepositOnly0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/download_data", _App_DownloadData0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_withdraw", _App_DepositWithdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_biw", _App_DepositBiw0_HTTP_Handler(srv))
@@ -265,8 +280,14 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.POST("/api/admin_dhb/lock_user_reward", _App_LockUserReward0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/admin_recommend_level", _App_AdminRecommendLevelUpdate0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/buy_list", _App_AdminBuyList0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/buy_list_two", _App_AdminBuyListTwo0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/buy_list_three", _App_AdminBuyListThree0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/good_list", _App_AdminGoodList0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/good_list_two", _App_AdminGoodListTwo0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/good_list_three", _App_AdminGoodListThree0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/update_goods", _App_AdminCreateGoods0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/update_goods_two", _App_AdminCreateGoodsTwo0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/update_goods_three", _App_AdminCreateGoodsThree0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/change_address", _App_AdminChangeAddress0_HTTP_Handler(srv))
 }
 
@@ -415,6 +436,25 @@ func _App_Deposit0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error 
 		http.SetOperation(ctx, OperationAppDeposit)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Deposit(ctx, req.(*DepositRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_DepositOnly0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DepositRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppDepositOnly)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.DepositOnly(ctx, req.(*DepositRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -1821,6 +1861,44 @@ func _App_AdminBuyList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) e
 	}
 }
 
+func _App_AdminBuyListTwo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminBuyListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminBuyListTwo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminBuyListTwo(ctx, req.(*AdminBuyListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminBuyListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_AdminBuyListThree0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminBuyListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminBuyListThree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminBuyListThree(ctx, req.(*AdminBuyListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminBuyListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _App_AdminGoodList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in AdminGoodListRequest
@@ -1830,6 +1908,44 @@ func _App_AdminGoodList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) 
 		http.SetOperation(ctx, OperationAppAdminGoodList)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.AdminGoodList(ctx, req.(*AdminGoodListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminGoodListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_AdminGoodListTwo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminGoodListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminGoodListTwo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminGoodListTwo(ctx, req.(*AdminGoodListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminGoodListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_AdminGoodListThree0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminGoodListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminGoodListThree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminGoodListThree(ctx, req.(*AdminGoodListRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -1852,6 +1968,50 @@ func _App_AdminCreateGoods0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Contex
 		http.SetOperation(ctx, OperationAppAdminCreateGoods)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.AdminCreateGoods(ctx, req.(*AdminCreateGoodsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminCreateGoodsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_AdminCreateGoodsTwo0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminCreateGoodsRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminCreateGoodsTwo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminCreateGoodsTwo(ctx, req.(*AdminCreateGoodsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminCreateGoodsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_AdminCreateGoodsThree0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminCreateGoodsRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminCreateGoodsThree)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminCreateGoodsThree(ctx, req.(*AdminCreateGoodsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -1893,6 +2053,8 @@ type AppHTTPClient interface {
 	AdminAreaLevelUpdate(ctx context.Context, req *AdminAreaLevelUpdateRequest, opts ...http.CallOption) (rsp *AdminAreaLevelUpdateReply, err error)
 	AdminBalanceUpdate(ctx context.Context, req *AdminBalanceUpdateRequest, opts ...http.CallOption) (rsp *AdminBalanceUpdateReply, err error)
 	AdminBuyList(ctx context.Context, req *AdminBuyListRequest, opts ...http.CallOption) (rsp *AdminBuyListReply, err error)
+	AdminBuyListThree(ctx context.Context, req *AdminBuyListRequest, opts ...http.CallOption) (rsp *AdminBuyListReply, err error)
+	AdminBuyListTwo(ctx context.Context, req *AdminBuyListRequest, opts ...http.CallOption) (rsp *AdminBuyListReply, err error)
 	AdminChangeAddress(ctx context.Context, req *AdminChangeAddressRequest, opts ...http.CallOption) (rsp *AdminChangeAddressReply, err error)
 	AdminChangePassword(ctx context.Context, req *AdminChangePasswordRequest, opts ...http.CallOption) (rsp *AdminChangePasswordReply, err error)
 	AdminConfig(ctx context.Context, req *AdminConfigRequest, opts ...http.CallOption) (rsp *AdminConfigReply, err error)
@@ -1900,6 +2062,8 @@ type AppHTTPClient interface {
 	AdminConfigUpdateListen(ctx context.Context, req *AdminConfigUpdateListenRequest, opts ...http.CallOption) (rsp *AdminConfigUpdateListenReply, err error)
 	AdminCreateAccount(ctx context.Context, req *AdminCreateAccountRequest, opts ...http.CallOption) (rsp *AdminCreateAccountReply, err error)
 	AdminCreateGoods(ctx context.Context, req *AdminCreateGoodsRequest, opts ...http.CallOption) (rsp *AdminCreateGoodsReply, err error)
+	AdminCreateGoodsThree(ctx context.Context, req *AdminCreateGoodsRequest, opts ...http.CallOption) (rsp *AdminCreateGoodsReply, err error)
+	AdminCreateGoodsTwo(ctx context.Context, req *AdminCreateGoodsRequest, opts ...http.CallOption) (rsp *AdminCreateGoodsReply, err error)
 	AdminDailyAreaReward(ctx context.Context, req *AdminDailyLocationRewardRequest, opts ...http.CallOption) (rsp *AdminDailyLocationRewardReply, err error)
 	AdminDailyBalanceReward(ctx context.Context, req *AdminDailyBalanceRewardRequest, opts ...http.CallOption) (rsp *AdminDailyBalanceRewardReply, err error)
 	AdminDailyFee(ctx context.Context, req *AdminDailyFeeRequest, opts ...http.CallOption) (rsp *AdminDailyFeeReply, err error)
@@ -1910,6 +2074,8 @@ type AppHTTPClient interface {
 	AdminDailyReward(ctx context.Context, req *AdminDailyRewardRequest, opts ...http.CallOption) (rsp *AdminDailyRewardReply, err error)
 	AdminFee(ctx context.Context, req *AdminFeeRequest, opts ...http.CallOption) (rsp *AdminFeeReply, err error)
 	AdminGoodList(ctx context.Context, req *AdminGoodListRequest, opts ...http.CallOption) (rsp *AdminGoodListReply, err error)
+	AdminGoodListThree(ctx context.Context, req *AdminGoodListRequest, opts ...http.CallOption) (rsp *AdminGoodListReply, err error)
+	AdminGoodListTwo(ctx context.Context, req *AdminGoodListRequest, opts ...http.CallOption) (rsp *AdminGoodListReply, err error)
 	AdminList(ctx context.Context, req *AdminListRequest, opts ...http.CallOption) (rsp *AdminListReply, err error)
 	AdminLocationAllList(ctx context.Context, req *AdminLocationAllListRequest, opts ...http.CallOption) (rsp *AdminLocationAllListReply, err error)
 	AdminLocationInsert(ctx context.Context, req *AdminLocationInsertRequest, opts ...http.CallOption) (rsp *AdminLocationInsertReply, err error)
@@ -1949,6 +2115,7 @@ type AppHTTPClient interface {
 	Deposit4(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	Deposit5(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	DepositBiw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
+	DepositOnly(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	DepositWithdraw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	DepositWithdrawBiw(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	DownloadData(ctx context.Context, req *DownloadDataRequest, opts ...http.CallOption) (rsp *DownloadDataReply, err error)
@@ -2080,6 +2247,32 @@ func (c *AppHTTPClientImpl) AdminBuyList(ctx context.Context, in *AdminBuyListRe
 	return &out, err
 }
 
+func (c *AppHTTPClientImpl) AdminBuyListThree(ctx context.Context, in *AdminBuyListRequest, opts ...http.CallOption) (*AdminBuyListReply, error) {
+	var out AdminBuyListReply
+	pattern := "/api/admin_dhb/buy_list_three"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminBuyListThree))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminBuyListTwo(ctx context.Context, in *AdminBuyListRequest, opts ...http.CallOption) (*AdminBuyListReply, error) {
+	var out AdminBuyListReply
+	pattern := "/api/admin_dhb/buy_list_two"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminBuyListTwo))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
 func (c *AppHTTPClientImpl) AdminChangeAddress(ctx context.Context, in *AdminChangeAddressRequest, opts ...http.CallOption) (*AdminChangeAddressReply, error) {
 	var out AdminChangeAddressReply
 	pattern := "/api/admin_dhb/change_address"
@@ -2163,6 +2356,32 @@ func (c *AppHTTPClientImpl) AdminCreateGoods(ctx context.Context, in *AdminCreat
 	pattern := "/api/admin_dhb/update_goods"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAppAdminCreateGoods))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminCreateGoodsThree(ctx context.Context, in *AdminCreateGoodsRequest, opts ...http.CallOption) (*AdminCreateGoodsReply, error) {
+	var out AdminCreateGoodsReply
+	pattern := "/api/admin_dhb/update_goods_three"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAppAdminCreateGoodsThree))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminCreateGoodsTwo(ctx context.Context, in *AdminCreateGoodsRequest, opts ...http.CallOption) (*AdminCreateGoodsReply, error) {
+	var out AdminCreateGoodsReply
+	pattern := "/api/admin_dhb/update_goods_two"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAppAdminCreateGoodsTwo))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
@@ -2293,6 +2512,32 @@ func (c *AppHTTPClientImpl) AdminGoodList(ctx context.Context, in *AdminGoodList
 	pattern := "/api/admin_dhb/good_list"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppAdminGoodList))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminGoodListThree(ctx context.Context, in *AdminGoodListRequest, opts ...http.CallOption) (*AdminGoodListReply, error) {
+	var out AdminGoodListReply
+	pattern := "/api/admin_dhb/good_list_three"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminGoodListThree))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminGoodListTwo(ctx context.Context, in *AdminGoodListRequest, opts ...http.CallOption) (*AdminGoodListReply, error) {
+	var out AdminGoodListReply
+	pattern := "/api/admin_dhb/good_list_two"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminGoodListTwo))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -2800,6 +3045,19 @@ func (c *AppHTTPClientImpl) DepositBiw(ctx context.Context, in *DepositRequest, 
 	pattern := "/api/admin_dhb/deposit_biw"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppDepositBiw))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) DepositOnly(ctx context.Context, in *DepositRequest, opts ...http.CallOption) (*DepositReply, error) {
+	var out DepositReply
+	pattern := "/api/admin_dhb/deposit_only"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppDepositOnly))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

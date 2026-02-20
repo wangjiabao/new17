@@ -628,6 +628,46 @@ func (ruc *RecordUseCase) DepositNew(ctx context.Context, userId, pId int64, amo
 	return nil
 }
 
+func (ruc *RecordUseCase) DepositNewNew(ctx context.Context, userId int64, amount uint64, eth *EthUserRecord, system bool) error {
+	lockAll.Lock()
+	defer lockAll.Unlock()
+
+	var (
+		err error
+	)
+	// 入金
+	if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		err = ruc.userInfoRepo.UpdateUserNewTwoNewTwoTwo(ctx, userId, amount)
+		if nil != err {
+			return err
+		}
+
+		// 充值记录
+		if !system {
+			_, err = ruc.ethUserRecordRepo.CreateEthUserRecordListByHash(ctx, &EthUserRecord{
+				Hash:      eth.Hash,
+				UserId:    eth.UserId,
+				Status:    eth.Status,
+				Type:      eth.Type,
+				Amount:    eth.Amount,
+				AmountTwo: amount,
+				CoinType:  eth.CoinType,
+				Last:      eth.Last,
+			})
+			if nil != err {
+				return err
+			}
+		}
+
+		return nil
+	}); nil != err {
+		fmt.Println(err, "错误投资3", userId, amount)
+		return err
+	}
+
+	return nil
+}
+
 func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord ...*EthUserRecord) (bool, error) {
 	//
 	//	var (

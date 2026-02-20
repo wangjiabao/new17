@@ -2851,6 +2851,17 @@ func (ub *UserBalanceRepo) RecommendRewardBiw(ctx context.Context, userId int64,
 	return userBalanceRecode.ID, nil
 }
 
+// UpdateUserNewTwoNewTwoTwo .
+func (ui *UserInfoRepo) UpdateUserNewTwoNewTwoTwo(ctx context.Context, userId int64, amount uint64) error {
+	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
+		Updates(map[string]interface{}{"amount_usdt": gorm.Expr("amount_usdt + ?", float64(amount))})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+	}
+
+	return nil
+}
+
 // UpdateUserNewTwoNewTwo .
 func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error {
 	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
@@ -6234,12 +6245,90 @@ func (ub *UserBalanceRepo) GetGoods(ctx context.Context) ([]*biz.Good, error) {
 	return res, nil
 }
 
+// GetGoodsTwo .
+func (ub *UserBalanceRepo) GetGoodsTwo(ctx context.Context) ([]*biz.Good, error) {
+	var goods []*Good
+	res := make([]*biz.Good, 0)
+	if err := ub.data.db.Table("good_two").Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error())
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+			Three:  good.Three,
+		})
+	}
+
+	return res, nil
+}
+
+// GetGoodsThree .
+func (ub *UserBalanceRepo) GetGoodsThree(ctx context.Context) ([]*biz.Good, error) {
+	var goods []*Good
+	res := make([]*biz.Good, 0)
+	if err := ub.data.db.Table("good_three").Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error())
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+			Three:  good.Three,
+		})
+	}
+
+	return res, nil
+}
+
 // UpdateGoods .
 func (u *UserRepo) UpdateGoods(ctx context.Context, id, status uint64) error {
 	var (
 		err error
 	)
 	if err = u.data.DB(ctx).Table("good").
+		Where("id=?", id).
+		Updates(map[string]interface{}{"status": status}).Error; nil != err {
+		return errors.NotFound("goods err", "goods not found")
+	}
+
+	return nil
+}
+
+// UpdateGoodsTwo .
+func (u *UserRepo) UpdateGoodsTwo(ctx context.Context, id, status uint64) error {
+	var (
+		err error
+	)
+	if err = u.data.DB(ctx).Table("good_two").
+		Where("id=?", id).
+		Updates(map[string]interface{}{"status": status}).Error; nil != err {
+		return errors.NotFound("goods err", "goods not found")
+	}
+
+	return nil
+}
+
+// UpdateGoodsThree .
+func (u *UserRepo) UpdateGoodsThree(ctx context.Context, id, status uint64) error {
+	var (
+		err error
+	)
+	if err = u.data.DB(ctx).Table("good_three").
 		Where("id=?", id).
 		Updates(map[string]interface{}{"status": status}).Error; nil != err {
 		return errors.NotFound("goods err", "goods not found")
@@ -6265,11 +6354,93 @@ func (u *UserRepo) CreateGoods(ctx context.Context, one, name, picName, three st
 	return nil
 }
 
+// CreateGoodsTwo .
+func (u *UserRepo) CreateGoodsTwo(ctx context.Context, one, name, picName, three string, amount uint64) error {
+	var good Good
+	good.Status = 0
+	good.Name = name
+	good.One = one
+	good.Two = picName
+	good.Three = three
+	good.Amount = amount
+	res := u.data.DB(ctx).Table("good_two").Create(&good)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_USER_INFO_ERROR", "用户信息创建失败")
+	}
+
+	return nil
+}
+
+// CreateGoodsThree .
+func (u *UserRepo) CreateGoodsThree(ctx context.Context, one, name, picName, three string, amount uint64) error {
+	var good Good
+	good.Status = 0
+	good.Name = name
+	good.One = one
+	good.Two = picName
+	good.Three = three
+	good.Amount = amount
+	res := u.data.DB(ctx).Table("good_three").Create(&good)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_USER_INFO_ERROR", "用户信息创建失败")
+	}
+
+	return nil
+}
+
 // GetGoodsOnline .
 func (ub *UserBalanceRepo) GetGoodsOnline(ctx context.Context) ([]*biz.Good, error) {
 	var goods []*Good
 	res := make([]*biz.Good, 0)
 	if err := ub.data.db.Table("good").Where("status=?", 1).Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error())
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+		})
+	}
+
+	return res, nil
+}
+
+// GetGoodsOnlineTwo .
+func (ub *UserBalanceRepo) GetGoodsOnlineTwo(ctx context.Context) ([]*biz.Good, error) {
+	var goods []*Good
+	res := make([]*biz.Good, 0)
+	if err := ub.data.db.Table("good_two").Where("status=?", 1).Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error())
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+		})
+	}
+
+	return res, nil
+}
+
+// GetGoodsOnlineThree .
+func (ub *UserBalanceRepo) GetGoodsOnlineThree(ctx context.Context) ([]*biz.Good, error) {
+	var goods []*Good
+	res := make([]*biz.Good, 0)
+	if err := ub.data.db.Table("good_three").Where("status=?", 1).Order("amount asc").Find(&goods).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found")
 		}
@@ -6322,6 +6493,72 @@ func (ub *UserBalanceRepo) GetGoodsPage(ctx context.Context, b *biz.Pagination) 
 	return res, nil, count
 }
 
+// GetGoodsPageTwo .
+func (ub *UserBalanceRepo) GetGoodsPageTwo(ctx context.Context, b *biz.Pagination) ([]*biz.Good, error, int64) {
+	var (
+		count int64
+		goods []*Good
+	)
+	res := make([]*biz.Good, 0)
+
+	instance := ub.data.db.Table("good_two")
+	instance = instance.Count(&count)
+
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found"), 0
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error()), 0
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+			Three:  good.Three,
+			Status: uint64(good.Status),
+		})
+	}
+
+	return res, nil, count
+}
+
+// GetGoodsPageThree .
+func (ub *UserBalanceRepo) GetGoodsPageThree(ctx context.Context, b *biz.Pagination) ([]*biz.Good, error, int64) {
+	var (
+		count int64
+		goods []*Good
+	)
+	res := make([]*biz.Good, 0)
+
+	instance := ub.data.db.Table("good_three")
+	instance = instance.Count(&count)
+
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("amount asc").Find(&goods).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("GOOD_NOT_FOUND", "good not found"), 0
+		}
+
+		return nil, errors.New(500, "Good ERROR", err.Error()), 0
+	}
+	for _, good := range goods {
+		res = append(res, &biz.Good{
+			ID:     good.ID,
+			Amount: good.Amount,
+			Name:   good.Name,
+			One:    good.One,
+			Two:    good.Two,
+			Three:  good.Three,
+			Status: uint64(good.Status),
+		})
+	}
+
+	return res, nil, count
+}
+
 // GetUserBuy .
 func (ub *UserBalanceRepo) GetUserBuy(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.BuyRecord, error, int64) {
 	var (
@@ -6331,6 +6568,96 @@ func (ub *UserBalanceRepo) GetUserBuy(ctx context.Context, b *biz.Pagination, us
 	res := make([]*biz.BuyRecord, 0)
 
 	instance := ub.data.db.Table("buy_record")
+
+	if 0 < userId {
+		instance = instance.Where("user_id=?", userId)
+	}
+
+	instance = instance.Where("status=?", 1)
+
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("id desc").Find(&rewards).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found"), 0
+		}
+
+		return nil, errors.New(500, "REWARD ERROR", err.Error()), 0
+	}
+
+	for _, reward := range rewards {
+		res = append(res, &biz.BuyRecord{
+			ID:          reward.ID,
+			UserId:      reward.UserId,
+			Status:      reward.Status,
+			LastUpdated: reward.LastUpdated,
+			Amount:      reward.Amount,
+			AmountGet:   reward.AmountGet,
+			CreatedAt:   reward.CreatedAt,
+			UpdatedAt:   reward.UpdatedAt,
+			One:         reward.One,
+			Two:         reward.Two,
+			Three:       reward.Three,
+			Four:        reward.Four,
+		})
+	}
+
+	return res, nil, count
+}
+
+// GetUserBuyTwo .
+func (ub *UserBalanceRepo) GetUserBuyTwo(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.BuyRecord, error, int64) {
+	var (
+		rewards []*BuyRecord
+		count   int64
+	)
+	res := make([]*biz.BuyRecord, 0)
+
+	instance := ub.data.db.Table("buy_record_two")
+
+	if 0 < userId {
+		instance = instance.Where("user_id=?", userId)
+	}
+
+	instance = instance.Where("status=?", 1)
+
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("id desc").Find(&rewards).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found"), 0
+		}
+
+		return nil, errors.New(500, "REWARD ERROR", err.Error()), 0
+	}
+
+	for _, reward := range rewards {
+		res = append(res, &biz.BuyRecord{
+			ID:          reward.ID,
+			UserId:      reward.UserId,
+			Status:      reward.Status,
+			LastUpdated: reward.LastUpdated,
+			Amount:      reward.Amount,
+			AmountGet:   reward.AmountGet,
+			CreatedAt:   reward.CreatedAt,
+			UpdatedAt:   reward.UpdatedAt,
+			One:         reward.One,
+			Two:         reward.Two,
+			Three:       reward.Three,
+			Four:        reward.Four,
+		})
+	}
+
+	return res, nil, count
+}
+
+// GetUserBuyThree .
+func (ub *UserBalanceRepo) GetUserBuyThree(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.BuyRecord, error, int64) {
+	var (
+		rewards []*BuyRecord
+		count   int64
+	)
+	res := make([]*biz.BuyRecord, 0)
+
+	instance := ub.data.db.Table("buy_record_three")
 
 	if 0 < userId {
 		instance = instance.Where("user_id=?", userId)

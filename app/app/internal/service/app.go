@@ -186,14 +186,171 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	return &v1.DepositReply{}, nil
 }
 
+// DepositOnly.
+func (a *AppService) DepositOnly(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
+	end := time.Now().UTC().Add(50 * time.Second)
+
+	// 配置
+	//configs, err = a.uuc.GetDhbConfig(ctx)
+	//if nil != configs {
+	//	for _, vConfig := range configs {
+	//		if "level1Dhb" == vConfig.KeyName {
+	//			level1Dhb = vConfig.Value + "00000000000"
+	//		} else if "level2Dhb" == vConfig.KeyName {
+	//			level2Dhb = vConfig.Value + "00000000000"
+	//		} else if "level3Dhb" == vConfig.KeyName {
+	//			level3Dhb = vConfig.Value + "00000000000"
+	//		}
+	//	}
+	//}
+
+	//var (
+	//	configs []*biz.Config
+	//	bPrice  float64
+	//)
+	//configs, _ = a.uuc.GetbPriceConfig(ctx)
+	//if nil != configs {
+	//	for _, vConfig := range configs {
+	//		if "b_price" == vConfig.KeyName {
+	//			bPrice, _ = strconv.ParseFloat(vConfig.Value, 10)
+	//		}
+	//	}
+	//}
+	//
+	//if 0 == bPrice {
+	//	fmt.Println("入金错误：价格为0")
+	//	return nil, nil
+	//}
+
+	for i := 1; i <= 10; i++ {
+		var (
+			depositUsdtResult []*userDepositNew
+			depositUsers      map[string]*biz.User
+			fromAccount       []string
+			userLength        int64
+			last              int64
+			err               error
+		)
+
+		last, err = a.ruc.GetEthUserRecordLast(ctx)
+		if nil != err {
+			fmt.Println(err)
+			continue
+		}
+
+		if -1 == last {
+			fmt.Println(err)
+			continue
+		}
+
+		// 0x0299e92df88c034F6425e78b6f6A367e84160B45 test
+		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
+		userLength, err = getUserLength("0xfD9F6C9b05d9AaB5aE7172321464c45aE9F8838F")
+		if nil != err {
+			fmt.Println(err)
+		}
+
+		if -1 == userLength {
+			continue
+		}
+
+		if 0 == userLength {
+			break
+		}
+
+		if last >= userLength {
+			break
+		}
+
+		// 0x0299e92df88c034F6425e78b6f6A367e84160B454 test
+		// 0x5d4bAA2A7a73dEF7685d036AAE993662B0Ef2f8F rel
+		depositUsdtResult, err = getUserInfoNew(last, userLength-1, "0xfD9F6C9b05d9AaB5aE7172321464c45aE9F8838F")
+		if nil != err {
+			break
+		}
+
+		now := time.Now().UTC()
+		//fmt.Println(now, end)
+		if end.Before(now) {
+			break
+		}
+
+		if 0 >= len(depositUsdtResult) {
+			break
+		}
+
+		for _, vUser := range depositUsdtResult {
+			fromAccount = append(fromAccount, vUser.Address)
+		}
+
+		depositUsers, err = a.uuc.GetUserByAddress(ctx, fromAccount...)
+		if nil != depositUsers {
+			// 统计开始
+			for _, vUser := range depositUsdtResult { // 主查usdt
+				if _, ok := depositUsers[vUser.Address]; !ok { // 用户不存在
+					continue
+				}
+
+				var (
+					tmpValue int64
+				)
+
+				if 100 <= vUser.Amount {
+					tmpValue = vUser.Amount
+				} else {
+					return &v1.DepositReply{}, nil
+				}
+
+				// 充值
+				err = a.ruc.DepositNewNew(ctx, depositUsers[vUser.Address].ID, uint64(tmpValue), &biz.EthUserRecord{ // 两种币的记录
+					UserId:    depositUsers[vUser.Address].ID,
+					Status:    "success",
+					Type:      "deposit",
+					RelAmount: tmpValue,
+					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000000000000000",
+					CoinType:  "USDT",
+					Last:      userLength,
+				}, false)
+				if nil != err {
+					fmt.Println(err)
+				}
+			}
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	return &v1.DepositReply{}, nil
+}
+
 // Upload upload .
 func (a *AppService) Upload(ctx transporthttp.Context) (err error) {
 	return a.uuc.Upload(ctx)
 }
 
+// UploadTwo uploadTwo .
+func (a *AppService) UploadTwo(ctx transporthttp.Context) (err error) {
+	return a.uuc.UploadTwo(ctx)
+}
+
+// UploadThree uploadThree .
+func (a *AppService) UploadThree(ctx transporthttp.Context) (err error) {
+	return a.uuc.UploadThree(ctx)
+}
+
 // AdminCreateGoods 处理 HTTP 文件上传请求
 func (a *AppService) AdminCreateGoods(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
 	return a.uuc.AdminCreateGoods(ctx, req)
+}
+
+// AdminCreateGoodsTwo 处理 HTTP 文件上传请求
+func (a *AppService) AdminCreateGoodsTwo(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
+	return a.uuc.AdminCreateGoodsTwo(ctx, req)
+}
+
+// AdminCreateGoodsThree 处理 HTTP 文件上传请求
+func (a *AppService) AdminCreateGoodsThree(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
+	return a.uuc.AdminCreateGoodsThree(ctx, req)
 }
 
 func (a *AppService) AdminDailyReward(ctx context.Context, req *v1.AdminDailyRewardRequest) (*v1.AdminDailyRewardReply, error) {
@@ -1133,7 +1290,7 @@ func (a *AppService) AdminAddMoneyThree(ctx context.Context, req *v1.AdminDailyA
 	}
 
 	// 充值
-	err = a.ruc.DepositNew(ctx, user.ID, 0, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
+	err = a.ruc.DepositNewNew(ctx, user.ID, uint64(req.SendBody.Usdt), &biz.EthUserRecord{ // 两种币的记录
 		UserId:    user.ID,
 		Status:    "success",
 		Type:      "deposit",
@@ -1859,8 +2016,24 @@ func (a *AppService) AdminBuyList(ctx context.Context, req *v1.AdminBuyListReque
 	return a.uuc.AdminBuyList(ctx, req)
 }
 
+func (a *AppService) AdminBuyListTwo(ctx context.Context, req *v1.AdminBuyListRequest) (*v1.AdminBuyListReply, error) {
+	return a.uuc.AdminBuyListTwo(ctx, req)
+}
+
+func (a *AppService) AdminBuyListThree(ctx context.Context, req *v1.AdminBuyListRequest) (*v1.AdminBuyListReply, error) {
+	return a.uuc.AdminBuyListThree(ctx, req)
+}
+
 func (a *AppService) AdminGoodList(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
 	return a.uuc.AdminGoodList(ctx, req)
+}
+
+func (a *AppService) AdminGoodListTwo(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
+	return a.uuc.AdminGoodListTwo(ctx, req)
+}
+
+func (a *AppService) AdminGoodListThree(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
+	return a.uuc.AdminGoodListThree(ctx, req)
 }
 
 func (a *AppService) AdminLocationAllList(ctx context.Context, req *v1.AdminLocationAllListRequest) (*v1.AdminLocationAllListReply, error) {
@@ -2899,6 +3072,103 @@ func getUserInfo(start int64, end int64, address string) ([]*userDeposit, error)
 			Address: v.String(),
 			Amount:  bals2[k].Int64(),
 			Id:      bals3[k].Int64(),
+		})
+	}
+
+	return users, nil
+}
+
+type userDepositNew struct {
+	Address string
+	Amount  int64
+}
+
+func getUserInfoNew(start int64, end int64, address string) ([]*userDepositNew, error) {
+	url1 := "https://bsc-dataseed4.binance.org/"
+
+	var (
+		bals  []common.Address
+		bals2 []*big.Int
+	)
+	users := make([]*userDepositNew, 0)
+
+	for i := 0; i < 5; i++ {
+		if 1 == i {
+			url1 = "https://binance.llamarpc.com/"
+		} else if 2 == i {
+			url1 = "https://bscrpc.com/"
+		} else if 3 == i {
+			url1 = "https://bsc-pokt.nodies.app/"
+		} else if 4 == i {
+			url1 = "https://data-seed-prebsc-1-s3.binance.org:8545/"
+		}
+
+		client, err := ethclient.Dial(url1)
+		if err != nil {
+			fmt.Println(nil, err)
+			continue
+		}
+
+		tokenAddress := common.HexToAddress(address)
+		instance, err := NewBuy(tokenAddress, client)
+		if err != nil {
+			fmt.Println(nil, err)
+			continue
+		}
+
+		bals, err = instance.GetUsersByIndex(&bind.CallOpts{}, new(big.Int).SetInt64(start), new(big.Int).SetInt64(end))
+		if err != nil {
+			fmt.Println(err)
+			//url1 = "https://bsc-dataseed4.binance.org"
+			continue
+		}
+
+		break
+	}
+
+	for i := 0; i < 5; i++ {
+		if 1 == i {
+			url1 = "https://binance.llamarpc.com/"
+		} else if 2 == i {
+			url1 = "https://bscrpc.com/"
+		} else if 3 == i {
+			url1 = "https://bsc-pokt.nodies.app/"
+		} else if 4 == i {
+			url1 = "https://data-seed-prebsc-1-s3.binance.org:8545/"
+		}
+
+		client, err := ethclient.Dial(url1)
+		if err != nil {
+			fmt.Println(nil, err)
+			continue
+		}
+
+		tokenAddress := common.HexToAddress(address)
+		instance, err := NewBuy(tokenAddress, client)
+		if err != nil {
+			fmt.Println(nil, err)
+			continue
+		}
+
+		bals2, err = instance.GetUsersAmountByIndex(&bind.CallOpts{}, new(big.Int).SetInt64(start), new(big.Int).SetInt64(end))
+		if err != nil {
+			fmt.Println(err)
+			//url1 = "https://bsc-dataseed4.binance.org"
+			continue
+		}
+
+		break
+	}
+
+	if len(bals) != len(bals2) {
+		fmt.Println("数量不一致，错误")
+		return users, nil
+	}
+
+	for k, v := range bals {
+		users = append(users, &userDepositNew{
+			Address: v.String(),
+			Amount:  bals2[k].Int64(),
 		})
 	}
 

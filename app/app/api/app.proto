@@ -67,6 +67,12 @@ service App {
 		};
 	};
 
+	rpc DepositOnly (DepositRequest) returns (DepositReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/deposit_only"
+		};
+	};
+
 	rpc DownloadData (DownloadDataRequest) returns (DownloadDataReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/download_data"
@@ -509,15 +515,53 @@ service App {
 		};
 	};
 
+	rpc AdminBuyListTwo (AdminBuyListRequest) returns (AdminBuyListReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/buy_list_two"
+		};
+	};
+
+	rpc AdminBuyListThree (AdminBuyListRequest) returns (AdminBuyListReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/buy_list_three"
+		};
+	};
+
 	rpc AdminGoodList (AdminGoodListRequest) returns (AdminGoodListReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/good_list"
 		};
 	};
 
+	rpc AdminGoodListTwo (AdminGoodListRequest) returns (AdminGoodListReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/good_list_two"
+		};
+	};
+
+	rpc AdminGoodListThree (AdminGoodListRequest) returns (AdminGoodListReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/good_list_three"
+		};
+	};
+
 	rpc AdminCreateGoods (AdminCreateGoodsRequest) returns (AdminCreateGoodsReply) {
 		option (google.api.http) = {
 			post: "/api/admin_dhb/update_goods"
+			body: "send_body"
+		};
+	};
+
+	rpc AdminCreateGoodsTwo (AdminCreateGoodsRequest) returns (AdminCreateGoodsReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/update_goods_two"
+			body: "send_body"
+		};
+	};
+
+	rpc AdminCreateGoodsThree (AdminCreateGoodsRequest) returns (AdminCreateGoodsReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/update_goods_three"
 			body: "send_body"
 		};
 	};

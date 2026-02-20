@@ -343,9 +343,17 @@ type UserBalanceRepo interface {
 	GetUserRewardByUserId(ctx context.Context, userId int64) ([]*Reward, error)
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
 	GetUserBuy(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
+	GetUserBuyTwo(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
+	GetUserBuyThree(ctx context.Context, b *Pagination, userId int64) ([]*BuyRecord, error, int64)
 	GetGoods(ctx context.Context) ([]*Good, error)
+	GetGoodsTwo(ctx context.Context) ([]*Good, error)
+	GetGoodsThree(ctx context.Context) ([]*Good, error)
 	GetGoodsOnline(ctx context.Context) ([]*Good, error)
+	GetGoodsOnlineTwo(ctx context.Context) ([]*Good, error)
+	GetGoodsOnlineThree(ctx context.Context) ([]*Good, error)
 	GetGoodsPage(ctx context.Context, b *Pagination) ([]*Good, error, int64)
+	GetGoodsPageTwo(ctx context.Context, b *Pagination) ([]*Good, error, int64)
+	GetGoodsPageThree(ctx context.Context, b *Pagination) ([]*Good, error, int64)
 	GetUserBuyByUserId(ctx context.Context, userId int64) ([]*BuyRecord, error)
 	GetUserBuyById(id int64) (*BuyRecord, error)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
@@ -445,6 +453,7 @@ type UserCurrentMonthRecommendRepo interface {
 
 type UserInfoRepo interface {
 	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
+	UpdateUserNewTwoNewTwoTwo(ctx context.Context, userId int64, amount uint64) error
 	GetAllBuyRecord(ctx context.Context) ([]*BuyRecord, error)
 	GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
 	GetBuyRecordingMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
@@ -495,7 +504,11 @@ type UserInfoRepo interface {
 
 type UserRepo interface {
 	UpdateGoods(ctx context.Context, id, status uint64) error
+	UpdateGoodsTwo(ctx context.Context, id, status uint64) error
+	UpdateGoodsThree(ctx context.Context, id, status uint64) error
 	CreateGoods(ctx context.Context, one, name, picName, three string, amount uint64) error
+	CreateGoodsTwo(ctx context.Context, one, name, picName, three string, amount uint64) error
+	CreateGoodsThree(ctx context.Context, one, name, picName, three string, amount uint64) error
 	GetRewardYes(ctx context.Context) ([]*Reward, error)
 	GetUsersNewTwo(ctx context.Context) ([]*User, error)
 	GetUserById(ctx context.Context, Id int64) (*User, error)
@@ -1061,6 +1074,198 @@ func (uuc *UserUseCase) AdminBuyList(ctx context.Context, req *v1.AdminBuyListRe
 	return res, nil
 }
 
+func (uuc *UserUseCase) AdminBuyListTwo(ctx context.Context, req *v1.AdminBuyListRequest) (*v1.AdminBuyListReply, error) {
+
+	var (
+		userSearch  *User
+		userId      int64 = 0
+		userRewards []*BuyRecord
+		users       map[int64]*User
+		userIdsMap  map[int64]int64
+		userIds     []int64
+		err         error
+		count       int64
+		goods       []*Good
+		goodsMap    map[int64]*Good
+	)
+	res := &v1.AdminBuyListReply{
+		Rewards: make([]*v1.AdminBuyListReply_List, 0),
+	}
+
+	// 地址查询
+	if "" != req.Address {
+		userSearch, err = uuc.repo.GetUserByAddress(ctx, req.Address)
+		if nil != err {
+			return res, nil
+		}
+		userId = userSearch.ID
+	}
+
+	userRewards, err, count = uuc.ubRepo.GetUserBuyTwo(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	}, userId)
+	if nil != err {
+		return res, nil
+	}
+	res.Count = count
+
+	userIdsMap = make(map[int64]int64, 0)
+	for _, vUserReward := range userRewards {
+		userIdsMap[vUserReward.UserId] = vUserReward.UserId
+	}
+	for _, v := range userIdsMap {
+		userIds = append(userIds, v)
+	}
+
+	goods, err = uuc.ubRepo.GetGoodsTwo(ctx)
+	if nil != err {
+		return nil, err
+	}
+	goodsMap = make(map[int64]*Good, 0)
+	for _, v := range goods {
+		goodsMap[v.ID] = v
+	}
+
+	users, err = uuc.repo.GetUserByUserIds(ctx, userIds...)
+	for _, vUserReward := range userRewards {
+		tmpUser := ""
+		if nil != users {
+			if _, ok := users[vUserReward.UserId]; ok {
+				tmpUser = users[vUserReward.UserId].Address
+			}
+		}
+
+		oneTmp := ""
+		if "1" != vUserReward.One {
+			oneTmp = vUserReward.One
+		}
+		twoTmp := ""
+		if "1" != vUserReward.One {
+			twoTmp = vUserReward.Two
+		}
+		threeTmp := ""
+		if "1" != vUserReward.One {
+			threeTmp = vUserReward.Three
+		}
+		fourTmp := ""
+		if 0 != vUserReward.Four {
+			if _, ok := goodsMap[vUserReward.Four]; ok {
+				fourTmp = goodsMap[vUserReward.Four].Name
+			}
+		}
+
+		res.Rewards = append(res.Rewards, &v1.AdminBuyListReply_List{
+			CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+			Amount:    fmt.Sprintf("%.2f", vUserReward.Amount),
+			Address:   tmpUser,
+			Id:        vUserReward.ID,
+			One:       fourTmp,
+			Two:       oneTmp,
+			Three:     twoTmp,
+			Four:      threeTmp,
+		})
+	}
+
+	return res, nil
+}
+
+func (uuc *UserUseCase) AdminBuyListThree(ctx context.Context, req *v1.AdminBuyListRequest) (*v1.AdminBuyListReply, error) {
+
+	var (
+		userSearch  *User
+		userId      int64 = 0
+		userRewards []*BuyRecord
+		users       map[int64]*User
+		userIdsMap  map[int64]int64
+		userIds     []int64
+		err         error
+		count       int64
+		goods       []*Good
+		goodsMap    map[int64]*Good
+	)
+	res := &v1.AdminBuyListReply{
+		Rewards: make([]*v1.AdminBuyListReply_List, 0),
+	}
+
+	// 地址查询
+	if "" != req.Address {
+		userSearch, err = uuc.repo.GetUserByAddress(ctx, req.Address)
+		if nil != err {
+			return res, nil
+		}
+		userId = userSearch.ID
+	}
+
+	userRewards, err, count = uuc.ubRepo.GetUserBuyThree(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	}, userId)
+	if nil != err {
+		return res, nil
+	}
+	res.Count = count
+
+	userIdsMap = make(map[int64]int64, 0)
+	for _, vUserReward := range userRewards {
+		userIdsMap[vUserReward.UserId] = vUserReward.UserId
+	}
+	for _, v := range userIdsMap {
+		userIds = append(userIds, v)
+	}
+
+	goods, err = uuc.ubRepo.GetGoodsThree(ctx)
+	if nil != err {
+		return nil, err
+	}
+	goodsMap = make(map[int64]*Good, 0)
+	for _, v := range goods {
+		goodsMap[v.ID] = v
+	}
+
+	users, err = uuc.repo.GetUserByUserIds(ctx, userIds...)
+	for _, vUserReward := range userRewards {
+		tmpUser := ""
+		if nil != users {
+			if _, ok := users[vUserReward.UserId]; ok {
+				tmpUser = users[vUserReward.UserId].Address
+			}
+		}
+
+		oneTmp := ""
+		if "1" != vUserReward.One {
+			oneTmp = vUserReward.One
+		}
+		twoTmp := ""
+		if "1" != vUserReward.One {
+			twoTmp = vUserReward.Two
+		}
+		threeTmp := ""
+		if "1" != vUserReward.One {
+			threeTmp = vUserReward.Three
+		}
+		fourTmp := ""
+		if 0 != vUserReward.Four {
+			if _, ok := goodsMap[vUserReward.Four]; ok {
+				fourTmp = goodsMap[vUserReward.Four].Name
+			}
+		}
+
+		res.Rewards = append(res.Rewards, &v1.AdminBuyListReply_List{
+			CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+			Amount:    fmt.Sprintf("%.2f", vUserReward.Amount),
+			Address:   tmpUser,
+			Id:        vUserReward.ID,
+			One:       fourTmp,
+			Two:       oneTmp,
+			Three:     twoTmp,
+			Four:      threeTmp,
+		})
+	}
+
+	return res, nil
+}
+
 func (uuc *UserUseCase) AdminGoodList(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
 
 	var (
@@ -1073,6 +1278,76 @@ func (uuc *UserUseCase) AdminGoodList(ctx context.Context, req *v1.AdminGoodList
 	}
 
 	goods, err, count = uuc.ubRepo.GetGoodsPage(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
+	if nil != err {
+		return res, nil
+	}
+	res.Count = count
+
+	for _, v := range goods {
+		res.Goods = append(res.Goods, &v1.AdminGoodListReply_List{
+			Id:     v.ID,
+			Name:   v.Name,
+			One:    v.One,
+			Two:    v.Two,
+			Amount: v.Amount,
+			Three:  v.Three,
+			Status: v.Status,
+		})
+	}
+
+	return res, nil
+}
+
+func (uuc *UserUseCase) AdminGoodListTwo(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
+
+	var (
+		goods []*Good
+		count int64
+		err   error
+	)
+	res := &v1.AdminGoodListReply{
+		Goods: make([]*v1.AdminGoodListReply_List, 0),
+	}
+
+	goods, err, count = uuc.ubRepo.GetGoodsPageTwo(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	})
+	if nil != err {
+		return res, nil
+	}
+	res.Count = count
+
+	for _, v := range goods {
+		res.Goods = append(res.Goods, &v1.AdminGoodListReply_List{
+			Id:     v.ID,
+			Name:   v.Name,
+			One:    v.One,
+			Two:    v.Two,
+			Amount: v.Amount,
+			Three:  v.Three,
+			Status: v.Status,
+		})
+	}
+
+	return res, nil
+}
+
+func (uuc *UserUseCase) AdminGoodListThree(ctx context.Context, req *v1.AdminGoodListRequest) (*v1.AdminGoodListReply, error) {
+
+	var (
+		goods []*Good
+		count int64
+		err   error
+	)
+	res := &v1.AdminGoodListReply{
+		Goods: make([]*v1.AdminGoodListReply_List, 0),
+	}
+
+	goods, err, count = uuc.ubRepo.GetGoodsPageThree(ctx, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
 	})
@@ -11723,6 +11998,16 @@ func (uuc *UserUseCase) AdminCreateGoods(ctx context.Context, req *v1.AdminCreat
 	return nil, uuc.repo.UpdateGoods(ctx, req.SendBody.Id, req.SendBody.Status)
 }
 
+// AdminCreateGoodsThree 处理 HTTP 文件上传请求
+func (uuc *UserUseCase) AdminCreateGoodsThree(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
+	return nil, uuc.repo.UpdateGoodsThree(ctx, req.SendBody.Id, req.SendBody.Status)
+}
+
+// AdminCreateGoodsTwo 处理 HTTP 文件上传请求
+func (uuc *UserUseCase) AdminCreateGoodsTwo(ctx context.Context, req *v1.AdminCreateGoodsRequest) (*v1.AdminCreateGoodsReply, error) {
+	return nil, uuc.repo.UpdateGoodsTwo(ctx, req.SendBody.Id, req.SendBody.Status)
+}
+
 func (uuc *UserUseCase) Upload(ctx transporthttp.Context) (err error) {
 
 	name := ctx.Request().FormValue("name")
@@ -11781,6 +12066,84 @@ func (uuc *UserUseCase) Upload(ctx transporthttp.Context) (err error) {
 	}
 
 	err = uuc.repo.CreateGoods(ctx, detail, name, picName, three, amountInt64)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uuc *UserUseCase) UploadTwo(ctx transporthttp.Context) (err error) {
+
+	name := ctx.Request().FormValue("name")
+	detail := ctx.Request().FormValue("one")
+	amount := ctx.Request().FormValue("amount")
+	three := ctx.Request().FormValue("three")
+	amountInt64, _ := strconv.ParseUint(amount, 10, 64)
+	if 0 >= amountInt64 {
+		return nil
+	}
+
+	file, _, err := ctx.Request().FormFile("file")
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	picName := time.Now().Format("20060102150405") + ".png"
+	// 修改文件名并创建保存图片
+	imageFile, err := os.Create("/www/wwwroot/www.ispayplay.com/images/" + picName)
+	if err != nil {
+		return
+	}
+	defer imageFile.Close()
+
+	// 将文件内容复制到保存的文件中
+	_, err = io.Copy(imageFile, file)
+	if err != nil {
+		return
+	}
+
+	err = uuc.repo.CreateGoodsTwo(ctx, detail, name, picName, three, amountInt64)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uuc *UserUseCase) UploadThree(ctx transporthttp.Context) (err error) {
+
+	name := ctx.Request().FormValue("name")
+	detail := ctx.Request().FormValue("one")
+	amount := ctx.Request().FormValue("amount")
+	three := ctx.Request().FormValue("three")
+	amountInt64, _ := strconv.ParseUint(amount, 10, 64)
+	if 0 >= amountInt64 {
+		return nil
+	}
+
+	file, _, err := ctx.Request().FormFile("file")
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	picName := time.Now().Format("20060102150405") + ".png"
+	// 修改文件名并创建保存图片
+	imageFile, err := os.Create("/www/wwwroot/www.ispayplay.com/images/" + picName)
+	if err != nil {
+		return
+	}
+	defer imageFile.Close()
+
+	// 将文件内容复制到保存的文件中
+	_, err = io.Copy(imageFile, file)
+	if err != nil {
+		return
+	}
+
+	err = uuc.repo.CreateGoodsThree(ctx, detail, name, picName, three, amountInt64)
 	if err != nil {
 		return err
 	}

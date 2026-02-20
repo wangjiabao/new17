@@ -47,6 +47,8 @@ func NewHTTPServer(c *conf.Server, app *service.AppService, logger log.Logger) *
 	route := srv.Route("/api/admin_dhb")
 	//图片上传
 	route.POST("/upload", app.Upload)
+	route.POST("/upload_two", app.UploadTwo)
+	route.POST("/upload_three", app.UploadThree)
 
 	route.GET("/download_data_two", app.DownloadDataTwo)
 	route.GET("/download_data_three", app.DownloadDataThree)
@@ -58,6 +60,7 @@ func NewWhiteListMatcher() selector.MatchFunc {
 	whiteList := make(map[string]struct{})
 	whiteList["/api.App/AdminLogin"] = struct{}{}
 	whiteList["/api.App/Deposit"] = struct{}{}
+	whiteList["/api.App/DepositOnly"] = struct{}{}
 	whiteList["/api.App/TestMoney"] = struct{}{}
 	whiteList["/api.App/DepositWithdraw"] = struct{}{}
 	whiteList["/api.App/DepositBiw"] = struct{}{}
