@@ -128,6 +128,7 @@ type UserBalance struct {
 	BalanceUsdtNew         int64     `gorm:"type:bigint"`
 	BalanceUsdtFloat       float64   `gorm:"type:decimal(65,20);not null"`
 	BalanceRawFloat        float64   `gorm:"type:decimal(65,20);not null"`
+	BalanceRawFloatNew     float64   `gorm:"type:decimal(65,20);not null"`
 	BalanceKsdtFloat       float64   `gorm:"type:decimal(65,20);not null"`
 	BalanceDhb             int64     `gorm:"type:bigint"`
 	BalanceC               int64     `gorm:"type:bigint"`
@@ -6881,6 +6882,7 @@ func (ub UserBalanceRepo) GetUserBalanceByUserIds(ctx context.Context, userIds .
 			BalanceC:               userBalance.BalanceC,
 			BalanceUsdtFloat:       userBalance.BalanceUsdtFloat,
 			BalanceRawFloat:        userBalance.BalanceRawFloat,
+			BalanceRawFloatNew:     userBalance.BalanceRawFloatNew,
 			BalanceKsdtFloat:       userBalance.BalanceKsdtFloat,
 			AreaTotalFloat:         userBalance.AreaTotalFloat,
 			AreaTotalFloatTwo:      userBalance.AreaTotalFloatTwo,

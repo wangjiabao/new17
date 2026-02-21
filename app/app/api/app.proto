@@ -840,6 +840,7 @@ message AdminUserListReply { // 用户信息
 		string amountUsdtTwo = 189; // 待释放
 		string balanceUsdt = 3; // usdt数量
 		string balanceDhb = 4; // ispay数量
+		string bAmount = 16; // ispay数量
 		int64 out = 7; // 出局次数
 		double areaTotal = 9; // 总业绩
 		double areaMin = 10; // 小区

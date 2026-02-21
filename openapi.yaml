@@ -2462,6 +2462,8 @@ components:
                     type: string
                 balanceDhb:
                     type: string
+                bAmount:
+                    type: string
                 out:
                     type: string
                 areaTotal:

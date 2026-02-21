@@ -165,6 +165,7 @@ type UserBalance struct {
 	BalanceUsdtFloat       float64
 	BalanceKsdtFloat       float64
 	BalanceRawFloat        float64
+	BalanceRawFloatNew     float64
 	BalanceC               int64
 	AreaTotalFloat         float64
 	AreaTotalFloatTwo      float64
@@ -960,6 +961,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			Address:            vUsers.Address,
 			BalanceUsdt:        fmt.Sprintf("%.2f", userBalances[vUsers.ID].BalanceUsdtFloat),
 			BalanceDhb:         fmt.Sprintf("%.2f", userBalances[vUsers.ID].BalanceRawFloat),
+			BAmount:            fmt.Sprintf("%.2f", userBalances[vUsers.ID].BalanceRawFloatNew),
 			Vip:                currentLevel,
 			Out:                vUsers.OutRate,
 			HistoryRecommend:   tmpMyRecommendUserIdsLen,
