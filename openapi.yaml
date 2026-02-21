@@ -1367,19 +1367,16 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Status'
     /api/admin_dhb/set_ispay:
-        get:
+        post:
             tags:
                 - App
             operationId: App_AdminSetIspay
-            parameters:
-                - name: amount
-                  in: query
-                  schema:
-                    type: string
-                - name: address
-                  in: query
-                  schema:
-                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminSetIspayRequest_SendBody'
+                required: true
             responses:
                 "200":
                     description: OK
@@ -2374,6 +2371,13 @@ components:
         AdminSetIspayReply:
             type: object
             properties: {}
+        AdminSetIspayRequest_SendBody:
+            type: object
+            properties:
+                amount:
+                    type: string
+                address:
+                    type: string
         AdminSetPassReply:
             type: object
             properties: {}

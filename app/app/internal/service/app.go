@@ -333,7 +333,7 @@ func (a *AppService) UploadTwo(ctx transporthttp.Context) (err error) {
 	return a.uuc.UploadTwo(ctx)
 }
 
-// UploadThree uploadThree .
+// UploadThree .
 func (a *AppService) UploadThree(ctx transporthttp.Context) (err error) {
 	return a.uuc.UploadThree(ctx)
 }

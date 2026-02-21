@@ -9924,14 +9924,14 @@ func (uuc *UserUseCase) AdminSetIspay(ctx context.Context, req *v1.AdminSetIspay
 		user *User
 		err  error
 	)
-	user, err = uuc.repo.GetUserByAddressTwo(ctx, req.Address)
+	user, err = uuc.repo.GetUserByAddressTwo(ctx, req.SendBody.Address)
 	if nil != err {
 		return nil, nil
 	}
 
 	if nil != user && 0 < user.ID {
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { //
-			err = uuc.uiRepo.UpdateUserIspay(ctx, user.ID, req.Amount)
+			err = uuc.uiRepo.UpdateUserIspay(ctx, user.ID, req.SendBody.Amount)
 			if nil != err {
 				return err
 			}
