@@ -2855,10 +2855,11 @@ func (ub *UserBalanceRepo) RecommendRewardBiw(ctx context.Context, userId int64,
 
 // UpdateUserNewTwoNewTwoTwo .
 func (ui *UserInfoRepo) UpdateUserNewTwoNewTwoTwo(ctx context.Context, userId int64, amount uint64) error {
-	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
-		Updates(map[string]interface{}{"amount_usdt": gorm.Expr("amount_usdt + ?", float64(amount))})
+	res := ui.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_usdt_float": gorm.Expr("balance_usdt_float+ ?", float64(amount))})
 	if res.Error != nil {
-		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+		return errors.New(500, "UPDATE_USER_ERROR", "one信息修改失败")
 	}
 
 	return nil
