@@ -4952,6 +4952,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	}
 
 	for _, vUsers := range users {
+		if 1 == vUsers.Lock {
+			continue
+		}
+
 		if 0 < vUsers.VipAdmin && vUsers.Amount > 0 {
 			if 1 == vUsers.VipAdmin {
 				levelOne = append(levelOne, vUsers)
@@ -5063,6 +5067,13 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 	t := time.Date(2026, 2, 18, 14, 0, 0, 0, time.UTC)
 	// 静态
 	for _, tmpBuyRecords := range buyRecords {
+		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
+			continue
+		}
+		if 1 == usersMap[tmpBuyRecords.UserId].Lock {
+			continue
+		}
+
 		num := 2.5
 		if tmpBuyRecords.CreatedAt.After(t) {
 			amountB := uint64(tmpBuyRecords.Amount)
@@ -5179,6 +5190,13 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 	// 团队和平级
 	for _, tmpBuyRecords := range buyRecords {
+		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
+			continue
+		}
+		if 1 == usersMap[tmpBuyRecords.UserId].Lock {
+			continue
+		}
+
 		num := 2.5
 		if _, ok := usersMap[tmpBuyRecords.UserId]; !ok {
 			continue
@@ -5255,6 +5273,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			if _, ok := usersMap[tmpUserId]; !ok {
 				fmt.Println("错误分红小区，信息缺失,user：", err, tmpBuyRecords)
+				continue
+			}
+
+			if 1 == usersMap[tmpUserId].Lock {
 				continue
 			}
 
@@ -5549,6 +5571,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 			continue
 		}
 
+		if 1 == usersMap[tmpBuyRecords.UserId].Lock {
+			continue
+		}
+
 		if 1 == usersMap[tmpBuyRecords.UserId].LockReward {
 			continue
 		}
@@ -5619,6 +5645,10 @@ func (uuc *UserUseCase) AdminDailyReward(ctx context.Context, req *v1.AdminDaily
 
 			if _, ok := usersMap[tmpUserId]; !ok {
 				fmt.Println("错误分红加速，信息缺失,user：", err, tmpBuyRecords)
+				continue
+			}
+
+			if 1 == usersMap[tmpUserId].Lock {
 				continue
 			}
 
