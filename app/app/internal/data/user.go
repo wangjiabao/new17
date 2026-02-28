@@ -2865,6 +2865,48 @@ func (ui *UserInfoRepo) UpdateUserNewTwoNewTwoTwo(ctx context.Context, userId in
 	return nil
 }
 
+// UpdateUserNewTwoNewTwoNew .
+func (ui *UserInfoRepo) UpdateUserNewTwoNewTwoNew(ctx context.Context, userId int64, amount uint64, one, two, three string, four int64) error {
+	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).
+		Updates(map[string]interface{}{"amount": gorm.Expr("amount + ?", amount)})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+	}
+
+	var buyRecord BuyRecord
+	buyRecord.UserId = userId
+	buyRecord.Amount = float64(amount)
+	buyRecord.AmountGet = 0
+	buyRecord.Status = 1
+	buyRecord.LastUpdated = time.Now().UTC().Unix()
+	buyRecord.One = one
+	buyRecord.Two = two
+	buyRecord.Three = three
+	buyRecord.Four = four
+
+	res = ui.data.DB(ctx).Table("buy_record").Create(&buyRecord)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
+
+	var (
+		err    error
+		reward Reward
+	)
+
+	reward.UserId = userId
+	reward.AmountNew = float64(amount)
+	reward.AmountNewTwo = float64(amount)
+	reward.Type = "USDT"  // 本次分红的行为类型
+	reward.Reason = "buy" // 给我分红的理由
+	err = ui.data.DB(ctx).Table("reward").Create(&reward).Error
+	if err != nil {
+		return errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
+
+	return nil
+}
+
 // UpdateUserNewTwoNewTwo .
 func (ui *UserInfoRepo) UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error {
 	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).

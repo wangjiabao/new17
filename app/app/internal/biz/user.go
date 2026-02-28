@@ -455,6 +455,7 @@ type UserCurrentMonthRecommendRepo interface {
 type UserInfoRepo interface {
 	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
 	UpdateUserNewTwoNewTwoTwo(ctx context.Context, userId int64, amount uint64) error
+	UpdateUserNewTwoNewTwoNew(ctx context.Context, userId int64, amount uint64, one, two, three string, four int64) error
 	GetAllBuyRecord(ctx context.Context) ([]*BuyRecord, error)
 	GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
 	GetBuyRecordingMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
@@ -10063,6 +10064,94 @@ func (uuc *UserUseCase) AdminSubMoney(ctx context.Context, req *v1.AdminSubMoney
 	//		}
 	//	}
 	//}
+
+	return nil, nil
+}
+
+func (uuc *UserUseCase) AdminAddMoneyThree(ctx context.Context, req *v1.AdminDailyAddMoneyTwoRequest) (*v1.AdminDailyAddMoneyTwoReply, error) {
+	var (
+		user *User
+		err  error
+	)
+	user, err = uuc.repo.GetUserByAddressTwo(ctx, req.SendBody.Address)
+	if nil != err {
+		return nil, nil
+	}
+
+	amount := req.SendBody.Usdt
+	four := 55
+	if 100 == amount {
+		amount = 100
+	} else if 300 == amount {
+		amount = 300
+		four = 63
+	} else if 500 == amount {
+		amount = 500
+		four = 64
+	} else if 1000 == amount {
+		amount = 1000
+		four = 65
+	} else if 5000 == amount {
+		amount = 5000
+		four = 66
+	} else if 10000 == amount {
+		amount = 10000
+		four = 67
+	} else if 15000 == amount {
+		amount = 15000
+		four = 68
+	} else if 30000 == amount {
+		amount = 30000
+		four = 69
+	} else if 50000 == amount {
+		amount = 50000
+		four = 70
+	} else if 100000 == amount {
+		amount = 100000
+		four = 71
+	} else if 150000 == amount {
+		amount = 150000
+		four = 72
+	} else {
+		return &v1.AdminDailyAddMoneyTwoReply{}, nil
+	}
+
+	one := ""
+	two := ""
+	three := ""
+	if "1" != user.One {
+		one += user.One
+	}
+	if "1" != user.Two {
+		one += user.Two
+	}
+	if "1" != user.Three {
+		one += user.Three
+	}
+	if "1" != user.Four {
+		one += user.Four
+	}
+	if "1" != user.Five {
+		one += user.Five
+	}
+	if "1" != user.Six {
+		two = user.Six
+	}
+	if "1" != user.Seven {
+		three = user.Seven
+	}
+
+	// 入金
+	if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		err = uuc.uiRepo.UpdateUserNewTwoNewTwoNew(ctx, user.ID, uint64(amount), one, two, three, int64(four))
+		if nil != err {
+			return err
+		}
+
+		return nil
+	}); nil != err {
+		fmt.Println(err, "错误投资3", amount)
+	}
 
 	return nil, nil
 }
