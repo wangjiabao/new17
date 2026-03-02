@@ -455,6 +455,7 @@ type UserCurrentMonthRecommendRepo interface {
 type UserInfoRepo interface {
 	UpdateUserNewTwoNewTwo(ctx context.Context, userId int64, amount uint64, amountIspay float64, one, two, three string, four int64) error
 	UpdateUserNewTwoNewTwoTwo(ctx context.Context, userId int64, amount uint64) error
+	UpdateUserThree(ctx context.Context, userId int64, amount uint64, one, two, three string, four int64) error
 	UpdateUserNewTwoNewTwoNew(ctx context.Context, userId int64, amount uint64, one, two, three string, four int64) error
 	GetAllBuyRecord(ctx context.Context) ([]*BuyRecord, error)
 	GetBuyRecordMap(ctx context.Context, userIds []int64) (map[int64][]*BuyRecord, error)
@@ -10151,6 +10152,98 @@ func (uuc *UserUseCase) AdminAddMoneyThree(ctx context.Context, req *v1.AdminDai
 		return nil
 	}); nil != err {
 		fmt.Println(err, "错误投资3", amount)
+	}
+
+	return nil, nil
+}
+
+func (uuc *UserUseCase) AdminAddMoneyFour(ctx context.Context, req *v1.AdminSubMoneyRequest) (*v1.AdminSubMoneyReply, error) {
+	var (
+		user []*User
+		err  error
+	)
+	user, err = uuc.repo.GetAllUsers(ctx)
+	if nil != err {
+		fmt.Println("err ")
+		return nil, nil
+	}
+
+	for _, v := range user {
+		if 1 == v.Lock {
+			continue
+		}
+
+		var (
+			userBlance *UserBalance
+		)
+		userBlance, err = uuc.ubRepo.GetUserBalance(ctx, v.ID)
+		if nil != err {
+			fmt.Println("err b")
+			continue
+		}
+
+		if 100 > userBlance.BalanceUsdtFloat {
+			continue
+		}
+
+		amount := userBlance.BalanceUsdtFloat
+		oAmount := userBlance.BalanceUsdtFloat
+		four := 55
+		if 100 <= amount && 300 < amount {
+			amount = amount / 2.5
+		} else if 300 <= amount && 500 < amount {
+			amount = amount / 2.5
+			four = 63
+		} else if 500 <= amount && 1000 < amount {
+			amount = amount / 2.5
+			four = 64
+		} else if 1000 <= amount && 5000 == amount {
+			amount = amount / 2.5
+			four = 65
+		} else if 5000 <= amount && 10000 < amount {
+			amount = amount / 3
+			four = 66
+		} else if 10000 <= amount && 15000 < amount {
+			amount = amount / 3
+			four = 67
+		} else if 15000 <= amount && 30000 < amount {
+			amount = amount / 3
+			four = 68
+		} else if 30000 <= amount && 50000 < amount {
+			amount = amount / 3.5
+			four = 69
+		} else if 50000 <= amount && 100000 < amount {
+			amount = amount / 3.5
+			four = 70
+		} else if 100000 <= amount && 150000 < amount {
+			amount = amount / 4
+			four = 71
+		} else if 150000 <= amount {
+			amount = amount / 4
+			four = 72
+		} else {
+			fmt.Println("err b c")
+			continue
+		}
+
+		one := ""
+		two := ""
+		three := ""
+
+		// 入金
+		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+			err = uuc.uiRepo.UpdateUserThree(ctx, v.ID, uint64(amount), one, two, three, int64(four))
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); nil != err {
+			fmt.Println(err, "错误投资3, 手动", amount)
+			continue
+		}
+
+		fmt.Println("加上了", v.ID, uint64(amount), oAmount)
 	}
 
 	return nil, nil

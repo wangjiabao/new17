@@ -1277,6 +1277,11 @@ func (a *AppService) AdminAddMoneyThree(ctx context.Context, req *v1.AdminDailyA
 	return a.uuc.AdminAddMoneyThree(ctx, req)
 }
 
+// AdminAddMoneyFour  .
+func (a *AppService) AdminAddMoneyFour(ctx context.Context, req *v1.AdminSubMoneyRequest) (*v1.AdminSubMoneyReply, error) {
+	return a.uuc.AdminAddMoneyFour(ctx, req)
+}
+
 // Deposit5 deposit5.
 func (a *AppService) Deposit5(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
 	//
