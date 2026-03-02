@@ -10169,13 +10169,6 @@ func (uuc *UserUseCase) AdminAddMoneyFour(ctx context.Context, req *v1.AdminSubM
 	}
 
 	for _, v := range user {
-		if 899 == v.ID {
-			continue
-		} else if 10949 == v.ID {
-			continue
-		} else if 12919 == v.ID {
-			continue
-		}
 
 		var (
 			userBlance *UserBalance
@@ -10186,14 +10179,26 @@ func (uuc *UserUseCase) AdminAddMoneyFour(ctx context.Context, req *v1.AdminSubM
 			continue
 		}
 
-		if 100 > userBlance.BalanceUsdtFloat {
-			continue
+		if 899 == v.ID {
+
+		} else if 10949 == v.ID {
+
+		} else if 12919 == v.ID {
+
+		} else {
+			if 1 <= userBlance.BalanceUsdtFloat && userBlance.BalanceUsdtFloat <= 100 {
+
+			} else {
+				continue
+			}
 		}
 
 		amount := userBlance.BalanceUsdtFloat
 		oAmount := userBlance.BalanceUsdtFloat
 		four := 55
-		if 100 <= amount && 300 > amount {
+		if 1 <= amount && 100 > amount {
+			amount = amount / 2.5
+		} else if 100 <= amount && 300 > amount {
 			amount = amount / 2.5
 		} else if 300 <= amount && 500 > amount {
 			amount = amount / 2.5
