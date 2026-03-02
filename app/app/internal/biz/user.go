@@ -10169,7 +10169,11 @@ func (uuc *UserUseCase) AdminAddMoneyFour(ctx context.Context, req *v1.AdminSubM
 	}
 
 	for _, v := range user {
-		if 1 == v.Lock {
+		if 899 == v.ID {
+			continue
+		} else if 10949 == v.ID {
+			continue
+		} else if 12919 == v.ID {
 			continue
 		}
 
@@ -10222,7 +10226,7 @@ func (uuc *UserUseCase) AdminAddMoneyFour(ctx context.Context, req *v1.AdminSubM
 			amount = amount / 4
 			four = 72
 		} else {
-			fmt.Println("err b c")
+			fmt.Println("太小金额", v.ID, amount)
 			continue
 		}
 
